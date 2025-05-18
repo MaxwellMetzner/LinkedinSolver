@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkedIn Game Solvers</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <button class="tab-button active" data-tab="zip">Zip</button>
+            <button class="tab-button" data-tab="tango">Tango</button>
+            <button class="tab-button" data-tab="queens">Queens</button>
+        </nav>
+    </header>
+    <main>
+        <div id="zip-solver" class="game-solver active">
+            <h2>Zip Solver</h2>
+            <div class="solver-layout">
+                <div class="controls-panel">
+                    <label for="zip-grid-size-slider">Grid Size: <span id="zip-grid-size-label">6x6</span></label>
+                    <input type="range" id="zip-grid-size-slider" min="5" max="10" value="6">
+                    <button id="zip-clear-button">Clear</button>
+                    <button id="zip-solve-button">Solve</button>
+                </div>
+                <div class="grid-panel">
+                    <div class="grid-container" id="zip-grid"></div>
+                </div>
+            </div>
+            <div class="instructions">
+                <h3>How to Use Solver:</h3>
+                <ol>
+                    <li>Adjust the grid size using the slider (5x5 to 10x10).</li>
+                    <li>Click on cells in the grid to select points in a specific order. These points will be numbered.</li>
+                    <li>Right-click near the edge of a cell to place a block that prevents the path from crossing that edge. Right-click the block again to remove it.</li>
+                    <li>Click "Solve" to find the path. The solution will be highlighted in green with numbered steps.</li>
+                    <li>Click "Clear" to remove all selected points, blocks, and any solution path from the grid.</li>
+                    <li>If the puzzle is too complex or has no solution, the solver may time out or alert that no solution was found.</li>
+                </ol>
+            </div>
+        </div>
+        <div id="tango-solver" class="game-solver">
+            <h2>Tango Solver</h2>
+            <div class="solver-layout">
+                <div class="controls-panel">
+                    <!-- Grid size controls removed as Tango is always 6x6 -->
+                    <button id="tango-clear-button">Clear</button>
+                    <button id="tango-solve-button">Solve</button>
+                </div>
+                <div class="grid-panel">
+                    <div class="grid-container" id="tango-grid"></div>
+                </div>
+            </div>
+            <div class="instructions">
+                <h3>How to Use Solver:</h3>
+                <ol>
+                    <li>Click on a cell to cycle through sun, moon, and empty.</li>
+                    <li>Click between cells to cycle through constraint types: none, =, ×.</li>
+                    <li>Click "Solve" to solve the puzzle, or "Clear" to reset the grid.</li>
+                </ol>
+            </div>
+        </div>
+        <div id="queens-solver" class="game-solver">
+            <h2>Queens Solver</h2>
+            <div class="solver-layout">
+                <div class="controls-panel">
+                    <label for="queens-grid-size-slider">Grid Size: <span id="queens-grid-size-label">8x8</span></label>
+                    <input type="range" id="queens-grid-size-slider" min="4" max="12" value="8">
+                    <button id="queens-clear-button">Clear</button>
+                    <button id="queens-solve-button">Solve</button>
+                </div>
+                <div class="grid-panel">
+                    <div class="grid-container" id="queens-grid"></div>
+                </div>
+            </div>
+            <div class="instructions">
+                <h3>How to Use Solver:</h3>
+                <p><strong>Instructions:</strong></p>
+                <ol>
+                    <li><strong>Define Regions:</strong> Click and drag on the grid to draw colored regions. Each distinct area you draw will be a new region. You can draw over existing regions to reassign cells. A single click on an unassigned cell starts a new region; dragging through an existing region's cell allows you to expand it.</li>
+                    <li><strong>Place Queens (Optional):</strong> Right-click on a colored cell to place a queen. Right-click again to remove it.</li>
+                    <li><strong>Solve:</strong> Click "Solve".</li>
+                    <li><strong>Note:</strong> The grid must have N regions for an N x N grid, and all cells must belong to a region before solving.</li>
+                </ol>
+            </div>
+        </div>
+    </main>
+    <script src="js/solvers/zipSolver.js"></script>
+    <script src="js/solvers/tangoSolver.js"></script>
+    <script src="js/solvers/queensSolver.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

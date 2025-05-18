@@ -1,0 +1,289 @@
+/* filepath: c:\Users\maxwe\Documents\Repos\Linkedin Solver\css\style.css */
+body {
+    font-family: sans-serif;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+header {
+    background-color: #f0f0f0;
+    padding: 10px;
+    width: 100%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+nav {
+    display: flex;
+    justify-content: center;
+}
+
+.tab-button {
+    padding: 10px 20px;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    font-size: 1em;
+    margin: 0 5px;
+    border-bottom: 3px solid transparent;
+}
+
+.tab-button.active {
+    border-bottom: 3px solid blue;
+    font-weight: bold;
+}
+
+main {
+    padding: 20px;
+    width: 100%;
+    max-width: 800px; /* Adjust as needed */
+}
+
+.game-solver {
+    display: none; /* Hidden by default */
+    animation: fadeIn 0.5s;
+}
+
+.game-solver.active {
+    display: block; /* Shown when active */
+}
+
+.controls {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.controls label {
+    margin-right: 5px;
+}
+
+.controls input[type="range"] {
+    flex-grow: 1;
+    max-width: 200px;
+}
+
+.controls button {
+    padding: 8px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.controls button:hover {
+    background-color: #0056b3;
+}
+
+.controls-panel button {
+    padding: 10px 20px;
+    background-color: #4a7dff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: bold;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    margin: 5px 0;
+    width: 120px;
+}
+
+.controls-panel button:hover {
+    background-color: #3a67d8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.controls-panel button:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.solver-layout {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.controls-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.grid-panel {
+    flex-grow: 1;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(6, 50px); /* 6x6 grid, adjust cell size as needed */
+    grid-template-rows: repeat(6, 50px);
+    gap: 2px;
+    border: 1px solid #ccc;
+    width: fit-content;
+    margin-top: 20px;
+}
+
+.grid-cell {
+    width: 50px;
+    height: 50px;
+    border: 1px solid #eee;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2em;
+    cursor: default; /* Default cursor */
+}
+
+/* Specific to Zip grid cells that are interactive */
+#zip-grid .grid-cell {
+    cursor: pointer;
+}
+
+#zip-grid .grid-cell.user-selected {
+    background-color: lightblue;
+    font-weight: bold;
+}
+
+#zip-grid .grid-cell.solved-path {
+    background-color: lightgreen;
+}
+
+/* Styles for instructions */
+.instructions {
+    border: 1px solid #ccc;
+    padding: 15px;
+    margin-top: 20px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+}
+
+.instructions h3 {
+    margin-top: 0;
+}
+
+.instructions ol,
+.instructions ul {
+    padding-left: 20px;
+}
+
+.instructions p {
+    margin-bottom: 0;
+}
+
+/* Specific to Tango grid cells */
+#tango-grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(11, auto);
+    grid-template-rows: repeat(11, auto);
+    gap: 0;
+    width: fit-content;
+    border: 1px solid #ccc;
+    padding: 4px;
+    background-color: #f0f0f0;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+#tango-grid .grid-cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+#tango-grid .grid-cell.symbol-cell {
+    width: 60px;
+    height: 60px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    font-size: 1.8em;
+    cursor: pointer;
+}
+
+#tango-grid .grid-cell.horizontal-constraint {
+    width: 16px;
+    height: 60px;
+    font-size: 1.2em;
+    cursor: pointer;
+    background-color: #f5f5f5;
+    border: 1px solid #e0e0e0;
+}
+
+#tango-grid .grid-cell.vertical-constraint {
+    width: 60px;
+    height: 16px;
+    font-size: 1.2em;
+    cursor: pointer;
+    background-color: #f5f5f5;
+    border: 1px solid #e0e0e0;
+}
+
+#tango-grid .grid-cell.diagonal-space {
+    width: 16px;
+    height: 16px;
+    background-color: #444;
+    cursor: default;
+}
+
+#tango-grid .grid-cell.sun-cell {
+    background-color: #ffffcc; /* Light yellow for sun */
+}
+
+#tango-grid .grid-cell.moon-cell {
+    background-color: #e6e6ff; /* Light blue for moon */
+}
+
+#tango-grid .grid-cell.equal-constraint {
+    background-color: #e0f7e0; /* Light green for equal */
+    font-weight: bold;
+}
+
+#tango-grid .grid-cell.opposite-constraint {
+    background-color: #ffe0e0; /* Light red for opposite */
+    font-weight: bold;
+}
+
+/* Specific to Queens grid cells that are interactive (placeholder) */
+#queens-grid .grid-cell {
+    cursor: pointer;
+}
+
+/* #queens-grid .grid-cell.user-selected { */
+    /* This might not be used if direct background coloring is applied for regions */
+    /* background-color: lightsalmon; */ 
+/* } */
+
+#queens-grid .grid-cell.queen-placed {
+    font-weight: bold;
+    color: black; /* Or a distinct color for user-placed queens */
+    /* background-color: lightyellow; */ /* Optional: if you want a different bg for queen cells */
+}
+
+#queens-grid .grid-cell.solved-queen {
+    background-color: mediumpurple !important; /* Ensure this overrides region color for solved queens */
+    color: white;
+    font-weight: bold;
+}
+
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
