@@ -272,14 +272,18 @@ main {
 
 #queens-grid .grid-cell.queen-placed {
     font-weight: bold;
-    color: black; /* Or a distinct color for user-placed queens */
+    font-size: 1.5em;
+    color: black; /* Keep user-placed queens black */
     /* background-color: lightyellow; */ /* Optional: if you want a different bg for queen cells */
 }
 
 #queens-grid .grid-cell.solved-queen {
-    background-color: mediumpurple !important; /* Ensure this overrides region color for solved queens */
-    color: white;
+    /* Remove the background color override */
+    /* background-color: mediumpurple !important; */
     font-weight: bold;
+    font-size: 1.5em;
+    color: black; /* Make the queen icon black for solved queens too */
+    text-shadow: 0px 0px 3px #fff; /* Add a white shadow for better visibility */
 }
 
 

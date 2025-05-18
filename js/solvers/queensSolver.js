@@ -210,9 +210,9 @@ function handleQueensCellContextMenu(event, cell, row, col) {
             cell.style.backgroundColor = '';
         }
     } else { 
-        // Place queen
+        // Place queen with crown symbol
         STATE.placedQueens.push({ row, col, element: cell });
-        cell.textContent = 'Q';
+        cell.textContent = '♕'; // Unicode queen symbol
         cell.classList.add('queen-placed');
     }
 }
@@ -396,8 +396,9 @@ function displaySolution(solution) {
         
         const cell = getCell(queen.row, queen.col);
         if (cell) {
-            cell.textContent = '♕';
+            cell.textContent = '♕'; // Unicode queen symbol
             cell.classList.add('solved-queen');
+            // Don't override the region background color
         }
     }
 }
