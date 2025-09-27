@@ -12,6 +12,7 @@
             <button class="tab-button active" data-tab="zip">Zip</button>
             <button class="tab-button" data-tab="tango">Tango</button>
             <button class="tab-button" data-tab="queens">Queens</button>
+            <button class="tab-button" data-tab="mini">Mini Sudoku</button>
         </nav>
     </header>
     <main>
@@ -85,10 +86,32 @@
                 </ol>
             </div>
         </div>
+        <div id="mini-solver" class="game-solver">
+            <h2>Mini Sudoku Solver</h2>
+            <div class="solver-layout">
+                <div class="controls-panel">
+                    <button id="mini-clear-button">Clear</button>
+                    <button id="mini-solve-button">Solve</button>
+                </div>
+                <div class="grid-panel">
+                    <div class="grid-container" id="mini-grid"></div>
+                </div>
+            </div>
+            <div class="instructions">
+                <h3>How to Use Solver:</h3>
+                <ol>
+                    <li>Tap a cell to cycle through blank, 1&ndash;6, and back to blank to enter the given numbers.</li>
+                    <li>Each row, column, and 3x2 region must contain each number from 1 to 6 once.</li>
+                    <li>Press "Solve" to fill in the remaining cells. Solver-filled cells will be highlighted.</li>
+                    <li>Use "Clear" to reset the board.</li>
+                </ol>
+            </div>
+        </div>
     </main>
     <script src="js/solvers/zipSolver.js"></script>
     <script src="js/solvers/tangoSolver.js"></script>
     <script src="js/solvers/queensSolver.js"></script>
+    <script src="js/solvers/miniSudokuSolver.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>

@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
         zip: document.getElementById('zip-grid'),
         tango: document.getElementById('tango-grid'),
         queens: document.getElementById('queens-grid'),
+        mini: document.getElementById('mini-grid'),
     };
 
     // This object will be populated by each solver's initialize function
@@ -13,7 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const solverEventHandlers = {
         zip: {},
         tango: {},
-        queens: {}
+        queens: {},
+        mini: {}
     };
 
     // --- Generic function to create a grid ---
@@ -105,6 +107,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     container.addEventListener('mouseleave', (e) => handlers.handleGridMouseUp(e));
                  }
             }
+            if (typeof handlers.onAfterGridCreate === 'function') {
+                handlers.onAfterGridCreate(container, size);
+            }
         }
     }
 
@@ -190,6 +195,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (typeof initializeQueensSolver === 'function') {
         initializeQueensSolver(gridContainers.queens, createGrid, solverEventHandlers.queens);
+    }
+    if (typeof initializeMiniSudokuSolver === 'function') {
+        initializeMiniSudokuSolver(gridContainers.mini, createGrid, solverEventHandlers.mini);
     }
 
     // --- Initial setup on DOMContentLoaded ---

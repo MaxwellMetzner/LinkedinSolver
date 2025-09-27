@@ -1,2 +1,2 @@
 # LinkedinSolver
-Solves Linkedin Games (Zip, Queens, Tango)
+Solves LinkedIn Games (Zip, Queens, Tango, Mini Sudoku)
