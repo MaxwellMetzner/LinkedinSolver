@@ -7,6 +7,7 @@ let miniSudokuGrid = createNumericGrid();
 let miniSudokuUserCells = createBooleanGrid();
 let miniSudokuSolverCells = createBooleanGrid();
 let miniSudokuErrorCells = createBooleanGrid();
+let miniSudokuLocked = false;
 
 function createNumericGrid() {
     return Array.from({ length: MINI_SUDOKU_SIZE }, () => Array(MINI_SUDOKU_SIZE).fill(0));
@@ -18,6 +19,10 @@ function createBooleanGrid() {
 
 function handleMiniSudokuCellClick(event, cell, row, col) {
     event.preventDefault();
+
+    if (miniSudokuLocked) {
+        return;
+    }
 
     const currentValue = miniSudokuGrid[row][col];
     const nextValue = currentValue === MINI_SUDOKU_SIZE ? 0 : currentValue + 1;
@@ -64,6 +69,7 @@ function handleMiniSudokuSolve() {
         }
     }
 
+    setMiniSudokuLocked(true);
     refreshMiniSudokuGrid();
 }
 
@@ -73,6 +79,7 @@ function handleMiniSudokuClear() {
     miniSudokuSolverCells = createBooleanGrid();
     miniSudokuErrorCells = createBooleanGrid();
 
+    setMiniSudokuLocked(false);
     refreshMiniSudokuGrid();
 }
 
@@ -105,7 +112,7 @@ function refreshMiniSudokuGrid() {
 function applyMiniSudokuStyling() {
     if (!miniSudokuGridContainer) return;
     const outerBorder = '3px solid #444';
-    const regionBorder = '2px solid #444';
+    const regionBorder = '2px solid #666';
     const baseBorder = '1px solid #d4d4d4';
 
     const cells = miniSudokuGridContainer.querySelectorAll('.grid-cell');
@@ -131,6 +138,13 @@ function applyMiniSudokuStyling() {
             ? outerBorder
             : ((col + 1) % MINI_SUDOKU_REGION_COLS === 0 ? regionBorder : baseBorder);
     });
+}
+
+function setMiniSudokuLocked(locked) {
+    miniSudokuLocked = locked;
+    if (miniSudokuGridContainer) {
+        miniSudokuGridContainer.classList.toggle('mini-locked', locked);
+    }
 }
 
 function validateMiniSudoku(board) {
@@ -275,6 +289,7 @@ function initializeMiniSudokuSolver(gridContainer, createGridFunc, handlersObjec
         handlersObject.onAfterGridCreate = () => {
             applyMiniSudokuStyling();
             refreshMiniSudokuGrid();
+            setMiniSudokuLocked(miniSudokuLocked);
         };
     }
 
@@ -286,5 +301,6 @@ function initializeMiniSudokuSolver(gridContainer, createGridFunc, handlersObjec
         clearButton.addEventListener('click', handleMiniSudokuClear);
     }
 
+    setMiniSudokuLocked(false);
     createGridFunc(miniSudokuGridContainer, MINI_SUDOKU_SIZE, 'mini');
 }

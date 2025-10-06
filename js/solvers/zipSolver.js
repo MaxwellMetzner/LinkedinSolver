@@ -8,10 +8,10 @@ let zipSelectedPoints = [];
 let zipCurrentSize = 6; // Default, will be updated
 let zipSolutionPath = []; // To store the found solution path for Zip
 let zipBlocks = []; // To store blocks between cells
-let zipBoardLocked = false;
 
-const zipGradientStartColor = { r: 255, g: 122, b: 89 };   // Warm coral
-const zipGradientEndColor = { r: 46, g: 181, b: 160 };     // Cool teal
+const zipGradientStartColor = { r: 52, g: 199, b: 89 };   // Green
+const zipGradientMidColor = { r: 255, g: 228, b: 92 };    // Yellow
+const zipGradientEndColor = { r: 220, g: 53, b: 69 };     // Red
 
 // CSS for block indicators
 const blockStyleElement = document.createElement('style');
@@ -45,10 +45,6 @@ blockStyleElement.textContent = `
 document.head.appendChild(blockStyleElement);
 
 function handleZipCellClick(event, cell, row, col) {
-    if (zipBoardLocked) {
-        event.preventDefault();
-        return;
-    }
     // Only handle left clicks for path points
     if (event.button !== 0) return;
     
@@ -80,10 +76,6 @@ function handleZipCellClick(event, cell, row, col) {
 }
 
 function handleZipCellContextMenu(event, cell, row, col) {
-    if (zipBoardLocked) {
-        event.preventDefault();
-        return;
-    }
     event.preventDefault(); // Prevent context menu from appearing
     
     // Determine which edge was clicked
@@ -178,15 +170,14 @@ function displayZipSolutionOnGrid(gridSize, container) {
         const cellElement = container.querySelector(`[data-row="${p.r}"][data-col="${p.c}"]`);
         if (cellElement) {
             const t = total > 1 ? index / (total - 1) : 0;
-            const colorInfo = getZipGradientColor(t);
+            const color = getZipGradientColor(t);
 
             cellElement.classList.remove('user-selected');
             cellElement.classList.add('zip-solution-cell');
             cellElement.classList.toggle('zip-solution-start', index === 0);
             cellElement.classList.toggle('zip-solution-end', index === total - 1);
 
-            cellElement.style.backgroundColor = colorInfo.css;
-            cellElement.style.color = colorInfo.textColor;
+            cellElement.style.backgroundColor = color;
             cellElement.textContent = index + 1;
         }
     });
@@ -198,8 +189,7 @@ function clearZipSelections() {
     // Clear selected points
     zipSelectedPoints.forEach(p => {
         if (p.element) {
-            p.element.classList.remove('user-selected');
-            clearZipSolutionStyling(p.element);
+            p.element.classList.remove('user-selected', 'solved-path');
             p.element.textContent = '';
         }
     });
@@ -214,13 +204,15 @@ function clearZipSelections() {
     });
     zipBlocks = [];
 
-    const coloredCells = zipGridContainer.querySelectorAll('.grid-cell.zip-solution-cell');
-    coloredCells.forEach(cell => {
+    // Clear any remaining solved path indicators
+    const solvedCells = zipGridContainer.querySelectorAll('.grid-cell');
+    solvedCells.forEach(cell => {
+        cell.classList.remove('solved-path');
         clearZipSolutionStyling(cell);
-        cell.textContent = '';
+        if (!cell.classList.contains('user-selected')) {
+            cell.textContent = '';
+        }
     });
-
-    zipBoardLocked = false;
 }
 
 let zipSolverIterations = 0;
@@ -408,6 +400,7 @@ function zipSolverButtonClick() {
     // Clear previous solution display
     const allCells = zipGridContainer.querySelectorAll('.grid-cell');
     allCells.forEach(cell => {
+        cell.classList.remove('solved-path');
         clearZipSolutionStyling(cell);
         if (!cell.classList.contains('user-selected')) {
             cell.textContent = '';
@@ -430,10 +423,8 @@ function zipSolverButtonClick() {
     
     if (found) {
         displayZipSolutionOnGrid(zipCurrentSize, zipGridContainer);
-        zipBoardLocked = true;
         console.log(`Solution found in ${timeTaken} seconds (${zipSolverIterations} iterations)`);
     } else {
-        zipBoardLocked = false;
         if (zipSolverIterations >= MAX_SOLVER_ITERATIONS) {
             alert(`Solver timed out after ${timeTaken} seconds. The puzzle may be too complex or unsolvable.`);
         } else {
@@ -443,20 +434,25 @@ function zipSolverButtonClick() {
 }
 
 function getZipGradientColor(t) {
-    const r = Math.round(zipGradientStartColor.r + (zipGradientEndColor.r - zipGradientStartColor.r) * t);
-    const g = Math.round(zipGradientStartColor.g + (zipGradientEndColor.g - zipGradientStartColor.g) * t);
-    const b = Math.round(zipGradientStartColor.b + (zipGradientEndColor.b - zipGradientStartColor.b) * t);
-    const css = `rgb(${r}, ${g}, ${b})`;
-    const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
-    const textColor = luminance < 160 ? '#fdfdfd' : '#102347';
-    return { css, textColor };
+    if (t <= 0.5) {
+        const ratio = t / 0.5;
+        return interpolateZipColor(zipGradientStartColor, zipGradientMidColor, ratio);
+    }
+    const ratio = (t - 0.5) / 0.5;
+    return interpolateZipColor(zipGradientMidColor, zipGradientEndColor, ratio);
 }
 
 function clearZipSolutionStyling(cell) {
     cell.classList.remove('zip-solution-cell', 'zip-solution-start', 'zip-solution-end');
     cell.style.removeProperty('background');
     cell.style.removeProperty('background-color');
-    cell.style.removeProperty('color');
+}
+
+function interpolateZipColor(colorA, colorB, ratio) {
+    const r = Math.round(colorA.r + (colorB.r - colorA.r) * ratio);
+    const g = Math.round(colorA.g + (colorB.g - colorA.g) * ratio);
+    const b = Math.round(colorA.b + (colorB.b - colorA.b) * ratio);
+    return `rgb(${r}, ${g}, ${b})`;
 }
 
 function initializeZipSolver(_gridContainer, _createGridFunc, _handlersObject) {
