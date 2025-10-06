@@ -8,6 +8,7 @@ let zipSelectedPoints = [];
 let zipCurrentSize = 6; // Default, will be updated
 let zipSolutionPath = []; // To store the found solution path for Zip
 let zipBlocks = []; // To store blocks between cells
+let zipRequiredOrderLookup = new Map();
 
 const zipGradientStartColor = { r: 52, g: 199, b: 89 };   // Green
 const zipGradientMidColor = { r: 255, g: 228, b: 92 };    // Yellow
@@ -217,9 +218,15 @@ function clearZipSelections() {
 
 let zipSolverIterations = 0;
 const MAX_SOLVER_ITERATIONS = 5000000; // Limit iterations to prevent browser freezing
+const zipDirections = [
+    { dr: -1, dc: 0 },
+    { dr: 1, dc: 0 },
+    { dr: 0, dc: -1 },
+    { dr: 0, dc: 1 }
+];
 
 // Check if a move from (row, col) to (newRow, newCol) is blocked by a barrier
-function isBlockedMove(row, col, newRow, newCol) {
+function isBlockedMove(row, col, newRow, newCol, blockSet) {
     // Determine if the move is horizontal or vertical
     let blockType = row === newRow ? 'horizontal' : 'vertical';
     let blockId;
@@ -234,6 +241,10 @@ function isBlockedMove(row, col, newRow, newCol) {
         blockId = `h_${minRow}_${col}`;
     }
     
+    if (blockSet) {
+        return blockSet.has(blockId);
+    }
+
     return zipBlocks.some(block => block.id === blockId);
 }
 
@@ -259,19 +270,147 @@ function checkRequiredPointsVisited(path, currentTargetIdx) {
 // Sort zipSelectedPoints by order before starting the solver
 function prepareSelectedPoints() {
     zipSelectedPoints.sort((a, b) => a.order - b.order);
+    zipRequiredOrderLookup = new Map();
+    zipSelectedPoints.forEach((p, idx) => {
+        zipRequiredOrderLookup.set(`${p.row}_${p.col}`, idx);
+    });
 }
 
-// Check if the current path could potentially cover all remaining cells
-function canCompleteFullPath(gridSize, visited, row, col) {
-    // Quick check: If we've already visited all cells, we're good
-    const totalCells = gridSize * gridSize;
-    const visitedCount = visited.flat().filter(v => v).length;
-    
-    if (visitedCount === totalCells) return true;
-    
-    // For performance, we don't do complex connectivity checks
-    // We'll just rely on the backtracking to discover if it's possible
-    return true;
+function buildZipBlockSet() {
+    const blockSet = new Set();
+    zipBlocks.forEach(block => blockSet.add(block.id));
+    return blockSet;
+}
+
+function getZipNeighborMoves(row, col, visited, gridSize, blockSet) {
+    const moves = [];
+    for (const { dr, dc } of zipDirections) {
+        const newRow = row + dr;
+        const newCol = col + dc;
+
+        if (newRow < 0 || newRow >= gridSize || newCol < 0 || newCol >= gridSize) continue;
+        if (visited[newRow][newCol]) continue;
+        if (isBlockedMove(row, col, newRow, newCol, blockSet)) continue;
+
+        moves.push({ newRow, newCol });
+    }
+    return moves;
+}
+
+function countZipUnvisitedNeighbors(row, col, visited, gridSize, blockSet) {
+    let count = 0;
+    for (const { dr, dc } of zipDirections) {
+        const newRow = row + dr;
+        const newCol = col + dc;
+
+        if (newRow < 0 || newRow >= gridSize || newCol < 0 || newCol >= gridSize) continue;
+        if (visited[newRow][newCol]) continue;
+        if (isBlockedMove(row, col, newRow, newCol, blockSet)) continue;
+
+        count++;
+    }
+    return count;
+}
+
+function zipHasDisconnectedRegions(visited, gridSize, blockSet) {
+    let unvisitedCount = 0;
+    let startCell = null;
+
+    for (let r = 0; r < gridSize; r++) {
+        for (let c = 0; c < gridSize; c++) {
+            if (!visited[r][c]) {
+                unvisitedCount++;
+                if (!startCell) {
+                    startCell = { r, c };
+                }
+            }
+        }
+    }
+
+    if (!startCell) {
+        return false;
+    }
+
+    const seen = Array(gridSize).fill(null).map(() => Array(gridSize).fill(false));
+    const queue = [startCell];
+    seen[startCell.r][startCell.c] = true;
+    let reachable = 0;
+
+    while (queue.length > 0) {
+        const { r, c } = queue.shift();
+        reachable++;
+
+        for (const { dr, dc } of zipDirections) {
+            const nr = r + dr;
+            const nc = c + dc;
+
+            if (nr < 0 || nr >= gridSize || nc < 0 || nc >= gridSize) continue;
+            if (visited[nr][nc]) continue;
+            if (seen[nr][nc]) continue;
+            if (isBlockedMove(r, c, nr, nc, blockSet)) continue;
+
+            seen[nr][nc] = true;
+            queue.push({ r: nr, c: nc });
+        }
+    }
+
+    return reachable !== unvisitedCount;
+}
+
+function zipIsTargetReachable(row, col, targetRow, targetCol, visited, gridSize, blockSet) {
+    if (row === targetRow && col === targetCol) return true;
+
+    const queue = [{ r: row, c: col }];
+    const seen = Array(gridSize).fill(null).map(() => Array(gridSize).fill(false));
+    seen[row][col] = true;
+
+    while (queue.length > 0) {
+        const { r, c } = queue.shift();
+
+        for (const { dr, dc } of zipDirections) {
+            const nr = r + dr;
+            const nc = c + dc;
+
+            if (nr < 0 || nr >= gridSize || nc < 0 || nc >= gridSize) continue;
+            if (isBlockedMove(r, c, nr, nc, blockSet)) continue;
+            if (visited[nr][nc] && !(nr === targetRow && nc === targetCol)) continue;
+            if (seen[nr][nc]) continue;
+
+            if (nr === targetRow && nc === targetCol) {
+                return true;
+            }
+
+            seen[nr][nc] = true;
+            queue.push({ r: nr, c: nc });
+        }
+    }
+
+    return false;
+}
+
+function orderZipMoves(row, col, moves, visited, gridSize, blockSet, nextTargetIdx) {
+    if (moves.length <= 1) return moves;
+
+    const target = nextTargetIdx < zipSelectedPoints.length ? zipSelectedPoints[nextTargetIdx] : null;
+
+    const enriched = moves.map(move => {
+        const onward = countZipUnvisitedNeighbors(move.newRow, move.newCol, visited, gridSize, blockSet);
+        const distance = target ? Math.abs(move.newRow - target.row) + Math.abs(move.newCol - target.col) : 0;
+        return {
+            ...move,
+            onward,
+            distance,
+            forced: onward === 1
+        };
+    });
+
+    const forcedMoves = enriched.filter(m => m.forced);
+    const remainingMoves = enriched.filter(m => !m.forced);
+
+    forcedMoves.sort((a, b) => a.onward - b.onward || a.distance - b.distance);
+    remainingMoves.sort((a, b) => a.onward - b.onward || a.distance - b.distance);
+
+    return [...forcedMoves, ...remainingMoves].map(({ newRow, newCol }) => ({ newRow, newCol }));
 }
 
 // Main solver function
@@ -280,6 +419,7 @@ function solveZipPuzzle() {
     const visited = Array(gridSize).fill(null).map(() => Array(gridSize).fill(false));
     zipSolutionPath = [];
     zipSolverIterations = 0;
+    const blockSet = buildZipBlockSet();
     
     // Sort points by order before solving
     prepareSelectedPoints();
@@ -292,13 +432,13 @@ function solveZipPuzzle() {
     const startPoint = zipSelectedPoints[0];
     
     // Start the recursive solving process from the first selected point
-    const found = solveZipRecursive(startPoint.row, startPoint.col, 1, 0, gridSize, visited);
+    const found = solveZipRecursive(startPoint.row, startPoint.col, 1, 0, gridSize, visited, blockSet);
     
     return found;
 }
 
 // Recursive backtracking function for finding a solution
-function solveZipRecursive(row, col, pathLength, currentTargetIdx, gridSize, visited) {
+function solveZipRecursive(row, col, pathLength, currentTargetIdx, gridSize, visited, blockSet) {
     zipSolverIterations++;
     if (zipSolverIterations >= MAX_SOLVER_ITERATIONS) {
         return false; // Prevent browser from hanging on very complex puzzles
@@ -311,16 +451,17 @@ function solveZipRecursive(row, col, pathLength, currentTargetIdx, gridSize, vis
     let nextTargetIdx = currentTargetIdx;
     
     // Check if we're at a required point and update the target index
-    if (currentTargetIdx < zipSelectedPoints.length && 
-        row === zipSelectedPoints[currentTargetIdx].row && 
-        col === zipSelectedPoints[currentTargetIdx].col) {
-        nextTargetIdx++;
-    } else if (zipSelectedPoints.some(p => p.row === row && p.col === col && 
-              p.order - 1 !== currentTargetIdx)) {
+    const pointKey = `${row}_${col}`;
+    if (zipRequiredOrderLookup.has(pointKey)) {
+        const requiredIdx = zipRequiredOrderLookup.get(pointKey);
+        if (requiredIdx === currentTargetIdx) {
+            nextTargetIdx++;
+        } else if (requiredIdx > currentTargetIdx) {
         // We hit a required point out of order - invalid path
         visited[row][col] = false;
         zipSolutionPath.pop();
         return false;
+    }
     }
     
     // Check if we've completed a valid path
@@ -336,51 +477,34 @@ function solveZipRecursive(row, col, pathLength, currentTargetIdx, gridSize, vis
         }
     }
     
-    // Quick check if we can possibly complete a full path from here
-    if (!canCompleteFullPath(gridSize, visited, row, col)) {
+    if (zipHasDisconnectedRegions(visited, gridSize, blockSet)) {
+        visited[row][col] = false;
+        zipSolutionPath.pop();
+        return false;
+    }
+
+    if (nextTargetIdx < zipSelectedPoints.length) {
+        const target = zipSelectedPoints[nextTargetIdx];
+        if (!zipIsTargetReachable(row, col, target.row, target.col, visited, gridSize, blockSet)) {
+            visited[row][col] = false;
+            zipSolutionPath.pop();
+            return false;
+        }
+    }
+
+    const moves = getZipNeighborMoves(row, col, visited, gridSize, blockSet);
+
+    if (moves.length === 0) {
         visited[row][col] = false;
         zipSolutionPath.pop();
         return false;
     }
     
-    // Define the four possible directions (up, down, left, right)
-    const moves = [
-        { dr: -1, dc: 0 }, // Up
-        { dr: 1, dc: 0 },  // Down
-        { dr: 0, dc: -1 }, // Left
-        { dr: 0, dc: 1 }   // Right
-    ];
-    
-    // If we have a next target, prioritize moves toward it
-    if (nextTargetIdx < zipSelectedPoints.length) {
-        const targetRow = zipSelectedPoints[nextTargetIdx].row;
-        const targetCol = zipSelectedPoints[nextTargetIdx].col;
-        
-        moves.sort((a, b) => {
-            const distA = Math.abs(row + a.dr - targetRow) + Math.abs(col + a.dc - targetCol);
-            const distB = Math.abs(row + b.dr - targetRow) + Math.abs(col + b.dc - targetCol);
-            return distA - distB;
-        });
-    }
-    
-    // Try each possible direction
-    for (const move of moves) {
-        const newRow = row + move.dr;
-        const newCol = col + move.dc;
-        
-        // Check if the move is valid:
-        // 1. Within grid bounds
-        // 2. Cell not already visited
-        // 3. Move not blocked by a barrier
-        if (newRow >= 0 && newRow < gridSize && 
-            newCol >= 0 && newCol < gridSize && 
-            !visited[newRow][newCol] && 
-            !isBlockedMove(row, col, newRow, newCol)) {
-            
-            // Recursively try this path
-            if (solveZipRecursive(newRow, newCol, pathLength + 1, nextTargetIdx, gridSize, visited)) {
-                return true; // Solution found
-            }
+    const orderedMoves = orderZipMoves(row, col, moves, visited, gridSize, blockSet, nextTargetIdx);
+
+    for (const move of orderedMoves) {
+        if (solveZipRecursive(move.newRow, move.newCol, pathLength + 1, nextTargetIdx, gridSize, visited, blockSet)) {
+            return true; // Solution found
         }
     }
     
