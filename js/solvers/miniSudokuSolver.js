@@ -8,6 +8,8 @@ let miniSudokuUserCells = createBooleanGrid();
 let miniSudokuSolverCells = createBooleanGrid();
 let miniSudokuErrorCells = createBooleanGrid();
 let miniSudokuLocked = false;
+let miniSudokuNumberPicker;
+let miniSudokuActiveCell = null;
 
 function createNumericGrid() {
     return Array.from({ length: MINI_SUDOKU_SIZE }, () => Array(MINI_SUDOKU_SIZE).fill(0));
@@ -19,20 +21,25 @@ function createBooleanGrid() {
 
 function handleMiniSudokuCellClick(event, cell, row, col) {
     event.preventDefault();
+    event.stopPropagation();
 
     if (miniSudokuLocked) {
         return;
     }
 
-    const currentValue = miniSudokuGrid[row][col];
-    const nextValue = currentValue === MINI_SUDOKU_SIZE ? 0 : currentValue + 1;
+    miniSudokuActiveCell = { row, col, cell };
+    showMiniSudokuNumberPicker(cell, row, col);
+}
 
-    miniSudokuGrid[row][col] = nextValue;
-    miniSudokuUserCells[row][col] = nextValue !== 0;
-    miniSudokuSolverCells[row][col] = false;
-    miniSudokuErrorCells[row][col] = false;
+function handleMiniSudokuCellContextMenu(event, cell, row, col) {
+    event.preventDefault();
 
-    refreshMiniSudokuGrid();
+    if (miniSudokuLocked) {
+        return;
+    }
+
+    setMiniSudokuCellValue(row, col, 0);
+    hideMiniSudokuNumberPicker();
 }
 
 function handleMiniSudokuSolve() {
@@ -70,6 +77,7 @@ function handleMiniSudokuSolve() {
     }
 
     setMiniSudokuLocked(true);
+    hideMiniSudokuNumberPicker();
     refreshMiniSudokuGrid();
 }
 
@@ -81,6 +89,67 @@ function handleMiniSudokuClear() {
 
     setMiniSudokuLocked(false);
     refreshMiniSudokuGrid();
+}
+
+function findMiniSudokuConflicts(board, row, col, value) {
+    if (value === 0) return [];
+
+    const conflicts = [];
+
+    // Row
+    for (let c = 0; c < MINI_SUDOKU_SIZE; c++) {
+        if (c === col) continue;
+        if (board[row][c] === value) {
+            conflicts.push({ row, col: c });
+        }
+    }
+
+    // Column
+    for (let r = 0; r < MINI_SUDOKU_SIZE; r++) {
+        if (r === row) continue;
+        if (board[r][col] === value) {
+            conflicts.push({ row: r, col });
+        }
+    }
+
+    // Region
+    const startRow = Math.floor(row / MINI_SUDOKU_REGION_ROWS) * MINI_SUDOKU_REGION_ROWS;
+    const startCol = Math.floor(col / MINI_SUDOKU_REGION_COLS) * MINI_SUDOKU_REGION_COLS;
+
+    for (let r = 0; r < MINI_SUDOKU_REGION_ROWS; r++) {
+        for (let c = 0; c < MINI_SUDOKU_REGION_COLS; c++) {
+            const rr = startRow + r;
+            const cc = startCol + c;
+            if (rr === row && cc === col) continue;
+            if (board[rr][cc] === value) {
+                conflicts.push({ row: rr, col: cc });
+            }
+        }
+    }
+
+    return conflicts;
+}
+
+function setMiniSudokuCellValue(row, col, value, validate = false) {
+    if (validate && value !== 0) {
+        const conflicts = findMiniSudokuConflicts(miniSudokuGrid, row, col, value);
+        if (conflicts.length > 0) {
+            miniSudokuErrorCells = createBooleanGrid();
+            conflicts.forEach(({ row: r, col: c }) => {
+                miniSudokuErrorCells[r][c] = true;
+            });
+            miniSudokuErrorCells[row][col] = true;
+            refreshMiniSudokuGrid();
+            return false;
+        }
+    }
+
+    miniSudokuGrid[row][col] = value;
+    miniSudokuUserCells[row][col] = value !== 0;
+    miniSudokuSolverCells[row][col] = false;
+    miniSudokuErrorCells = createBooleanGrid();
+    refreshMiniSudokuGrid();
+    return true;
 }
 
 function refreshMiniSudokuGrid() {
@@ -107,6 +176,95 @@ function refreshMiniSudokuGrid() {
             }
         }
     }
+}
+
+function ensureMiniSudokuNumberPicker() {
+    if (miniSudokuNumberPicker) return;
+
+    const picker = document.createElement('div');
+    picker.className = 'mini-number-picker';
+
+    for (let num = 1; num <= MINI_SUDOKU_SIZE; num++) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = String(num);
+        btn.dataset.value = String(num);
+        btn.addEventListener('click', () => handleMiniSudokuNumberSelect(num));
+        picker.appendChild(btn);
+    }
+
+    const clearBtn = document.createElement('button');
+    clearBtn.type = 'button';
+    clearBtn.className = 'mini-number-clear';
+    clearBtn.textContent = 'Clear';
+    clearBtn.dataset.value = '0';
+    clearBtn.addEventListener('click', () => handleMiniSudokuNumberSelect(0));
+    picker.appendChild(clearBtn);
+
+    document.body.appendChild(picker);
+    miniSudokuNumberPicker = picker;
+}
+
+function showMiniSudokuNumberPicker(cell, row, col) {
+    ensureMiniSudokuNumberPicker();
+    if (!miniSudokuNumberPicker) return;
+
+    miniSudokuNumberPicker.dataset.row = String(row);
+    miniSudokuNumberPicker.dataset.col = String(col);
+    miniSudokuNumberPicker.classList.add('visible');
+    miniSudokuNumberPicker.style.visibility = 'hidden';
+    miniSudokuNumberPicker.style.left = '0px';
+    miniSudokuNumberPicker.style.top = '0px';
+
+    const cellRect = cell.getBoundingClientRect();
+    const pickerRect = miniSudokuNumberPicker.getBoundingClientRect();
+    const offset = 8;
+
+    let left = window.scrollX + cellRect.right + offset;
+    let top = window.scrollY + cellRect.top;
+
+    const viewportRight = window.scrollX + window.innerWidth;
+    const viewportBottom = window.scrollY + window.innerHeight;
+
+    if (left + pickerRect.width > viewportRight) {
+        left = window.scrollX + cellRect.left - pickerRect.width - offset;
+    }
+    if (left < window.scrollX + 4) {
+        left = window.scrollX + 4;
+    }
+
+    if (top + pickerRect.height > viewportBottom) {
+        top = window.scrollY + cellRect.bottom - pickerRect.height;
+    }
+    if (top < window.scrollY + 4) {
+        top = window.scrollY + 4;
+    }
+
+    miniSudokuNumberPicker.style.left = `${left}px`;
+    miniSudokuNumberPicker.style.top = `${top}px`;
+    miniSudokuNumberPicker.style.visibility = 'visible';
+}
+
+function hideMiniSudokuNumberPicker() {
+    if (miniSudokuNumberPicker) {
+        miniSudokuNumberPicker.classList.remove('visible');
+    }
+    miniSudokuActiveCell = null;
+}
+
+function handleMiniSudokuNumberSelect(value) {
+    if (!miniSudokuActiveCell) return;
+
+    const { row, col } = miniSudokuActiveCell;
+    // Allow clear without validation so the user can always remove a value.
+    if (value === 0) {
+        setMiniSudokuCellValue(row, col, 0, false);
+        hideMiniSudokuNumberPicker();
+        return;
+    }
+
+    const placed = setMiniSudokuCellValue(row, col, value, true);
+    if (placed) hideMiniSudokuNumberPicker();
 }
 
 function applyMiniSudokuStyling() {
@@ -285,6 +443,7 @@ function initializeMiniSudokuSolver(gridContainer, createGridFunc, handlersObjec
 
     if (handlersObject) {
         handlersObject.handleCellClick = handleMiniSudokuCellClick;
+        handlersObject.handleCellContextMenu = handleMiniSudokuCellContextMenu;
         handlersObject.getCurrentSize = () => MINI_SUDOKU_SIZE;
         handlersObject.onAfterGridCreate = () => {
             applyMiniSudokuStyling();
@@ -300,6 +459,14 @@ function initializeMiniSudokuSolver(gridContainer, createGridFunc, handlersObjec
     if (clearButton) {
         clearButton.addEventListener('click', handleMiniSudokuClear);
     }
+
+    document.addEventListener('click', (event) => {
+        if (!miniSudokuNumberPicker || !miniSudokuNumberPicker.classList.contains('visible')) return;
+        const target = event.target;
+        if (miniSudokuNumberPicker.contains(target)) return;
+        if (miniSudokuGridContainer && miniSudokuGridContainer.contains(target)) return;
+        hideMiniSudokuNumberPicker();
+    });
 
     setMiniSudokuLocked(false);
     createGridFunc(miniSudokuGridContainer, MINI_SUDOKU_SIZE, 'mini');

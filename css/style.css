@@ -346,6 +346,61 @@ main {
     opacity: 0.95;
 }
 
+.mini-number-picker {
+    position: absolute;
+    display: none;
+    grid-template-columns: repeat(3, 44px);
+    grid-auto-rows: 44px;
+    gap: 6px;
+    padding: 10px;
+    background: #ffffff;
+    border: 1px solid #d4dae6;
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.16);
+    z-index: 1000;
+}
+
+.mini-number-picker.visible {
+    display: grid;
+}
+
+.mini-number-picker button {
+    width: 44px;
+    height: 44px;
+    border: none;
+    border-radius: 8px;
+    background-color: #f1f4ff;
+    color: #1f2d64;
+    font-weight: 700;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
+}
+
+.mini-number-picker button:hover {
+    background-color: #dfe6ff;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.mini-number-picker button:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.14);
+}
+
+.mini-number-picker .mini-number-clear {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #ffecec;
+    color: #8b1d1d;
+}
+
+.mini-number-picker .mini-number-clear:hover {
+    background-color: #ffd8d8;
+}
+
 
 @keyframes fadeIn {
     from { opacity: 0; }
