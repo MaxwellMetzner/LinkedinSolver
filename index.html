@@ -3,115 +3,246 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Solve LinkedIn's daily games - Zip, Tango, Queens, and Mini Sudoku with our free online solvers">
+    <meta name="theme-color" content="#0a66c2">
     <title>LinkedIn Game Solvers</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
 </head>
 <body>
     <header>
-        <nav>
-            <button class="tab-button active" data-tab="zip">Zip</button>
-            <button class="tab-button" data-tab="tango">Tango</button>
-            <button class="tab-button" data-tab="queens">Queens</button>
-            <button class="tab-button" data-tab="mini">Mini Sudoku</button>
-        </nav>
+        <div class="header-container">
+            <a href="#" class="logo">
+                <div class="logo-icon">🎮</div>
+                <span class="logo-text">Game Solvers</span>
+            </a>
+            
+            <nav aria-label="Game selector">
+                <button class="tab-button active" data-tab="zip" aria-selected="true">
+                    <span>⚡ Zip</span>
+                </button>
+                <button class="tab-button" data-tab="tango" aria-selected="false">
+                    <span>☯ Tango</span>
+                </button>
+                <button class="tab-button" data-tab="queens" aria-selected="false">
+                    <span>♛ Queens</span>
+                </button>
+                <button class="tab-button" data-tab="mini" aria-selected="false">
+                    <span>🔢 Mini Sudoku</span>
+                </button>
+            </nav>
+            
+            <div class="header-actions">
+                <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle theme">
+                    <div class="theme-toggle-track">
+                        <span>☀️</span>
+                        <span>🌙</span>
+                    </div>
+                    <div class="theme-toggle-thumb"></div>
+                </button>
+            </div>
+        </div>
     </header>
+
     <main>
+        <!-- Zip Solver -->
         <div id="zip-solver" class="game-solver active">
-            <h2>Zip Solver</h2>
-            <div class="solver-layout">
-                <div class="controls-panel">
-                    <label for="zip-grid-size-slider">Grid Size: <span id="zip-grid-size-label">6x6</span></label>
-                    <input type="range" id="zip-grid-size-slider" min="5" max="10" value="6">
-                    <button id="zip-clear-button">Clear</button>
-                    <button id="zip-solve-button">Solve</button>
+            <div class="solver-card">
+                <div class="solver-header">
+                    <h2 class="solver-title">
+                        <span class="solver-title-icon">⚡</span>
+                        Zip Solver
+                    </h2>
+                    <a href="https://www.linkedin.com/games/zip/" target="_blank" rel="noopener noreferrer" class="play-link">
+                        Play on LinkedIn
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M5.22 14.78a.75.75 0 001.06 0l7.22-7.22v5.69a.75.75 0 001.5 0v-7.5a.75.75 0 00-.75-.75h-7.5a.75.75 0 000 1.5h5.69l-7.22 7.22a.75.75 0 000 1.06z" clip-rule="evenodd" />
+                        </svg>
+                    </a>
                 </div>
-                <div class="grid-panel">
-                    <div class="grid-container" id="zip-grid"></div>
+                <div class="solver-body">
+                    <div class="solver-layout">
+                        <div class="controls-panel">
+                            <div class="control-group">
+                                <label for="zip-grid-size-slider">
+                                    Grid Size: <span id="zip-grid-size-label" class="size-label">6×6</span>
+                                </label>
+                                <input type="range" id="zip-grid-size-slider" min="5" max="10" value="6">
+                            </div>
+                            <div class="button-group">
+                                <button id="zip-clear-button" class="btn-secondary">Clear</button>
+                                <button id="zip-solve-button" class="btn-primary">Solve</button>
+                            </div>
+                        </div>
+                        <div class="grid-panel">
+                            <div class="grid-container" id="zip-grid"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="instructions">
-                <h3>How to Use Solver:</h3>
+                <div class="instructions-header">
+                    <span class="instructions-icon">💡</span>
+                    <h3>How to Use</h3>
+                </div>
                 <ol>
-                    <li>Adjust the grid size using the slider (5x5 to 10x10).</li>
-                    <li>Click on cells in the grid to select points in a specific order. These points will be numbered.</li>
-                    <li>Right-click near the edge of a cell to place a block that prevents the path from crossing that edge. Right-click the block again to remove it.</li>
-                    <li>Click "Solve" to find the path. The solution will be highlighted in green with numbered steps.</li>
-                    <li>Click "Clear" to remove all selected points, blocks, and any solution path from the grid.</li>
-                    <li>If the puzzle is too complex or has no solution, the solver may time out or alert that no solution was found.</li>
+                    <li>Adjust the grid size using the slider (5×5 to 10×10).</li>
+                    <li>Click on cells to select points in order. These will be numbered.</li>
+                    <li>Right-click near a cell edge to place a block preventing the path from crossing. Right-click again to remove.</li>
+                    <li>Click <strong>Solve</strong> to find the path. The solution will be highlighted with numbered steps.</li>
+                    <li>Click <strong>Clear</strong> to reset the grid.</li>
                 </ol>
             </div>
         </div>
+
+        <!-- Tango Solver -->
         <div id="tango-solver" class="game-solver">
-            <h2>Tango Solver</h2>
-            <div class="solver-layout">
-                <div class="controls-panel">
-                    <!-- Grid size controls removed as Tango is always 6x6 -->
-                    <button id="tango-clear-button">Clear</button>
-                    <button id="tango-solve-button">Solve</button>
+            <div class="solver-card">
+                <div class="solver-header">
+                    <h2 class="solver-title">
+                        <span class="solver-title-icon">☯</span>
+                        Tango Solver
+                    </h2>
+                    <a href="https://www.linkedin.com/games/tango/" target="_blank" rel="noopener noreferrer" class="play-link">
+                        Play on LinkedIn
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M5.22 14.78a.75.75 0 001.06 0l7.22-7.22v5.69a.75.75 0 001.5 0v-7.5a.75.75 0 00-.75-.75h-7.5a.75.75 0 000 1.5h5.69l-7.22 7.22a.75.75 0 000 1.06z" clip-rule="evenodd" />
+                        </svg>
+                    </a>
                 </div>
-                <div class="grid-panel">
-                    <div class="grid-container" id="tango-grid"></div>
+                <div class="solver-body">
+                    <div class="solver-layout">
+                        <div class="controls-panel">
+                            <div class="button-group">
+                                <button id="tango-clear-button" class="btn-secondary">Clear</button>
+                                <button id="tango-solve-button" class="btn-primary">Solve</button>
+                            </div>
+                        </div>
+                        <div class="grid-panel">
+                            <div class="grid-container" id="tango-grid"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="instructions">
-                <h3>How to Use Solver:</h3>
+                <div class="instructions-header">
+                    <span class="instructions-icon">💡</span>
+                    <h3>How to Use</h3>
+                </div>
                 <ol>
-                    <li>Click on a cell to cycle through sun, moon, and empty.</li>
-                    <li>Click between cells to cycle through constraint types: none, =, ×.</li>
-                    <li>Click "Solve" to solve the puzzle, or "Clear" to reset the grid.</li>
+                    <li>Click on a cell to cycle through: ☀️ sun → 🌙 moon → empty.</li>
+                    <li>Click between cells to set constraints: none → <strong>=</strong> (same) → <strong>×</strong> (opposite).</li>
+                    <li>Click <strong>Solve</strong> to complete the puzzle, or <strong>Clear</strong> to reset.</li>
                 </ol>
             </div>
         </div>
+
+        <!-- Queens Solver -->
         <div id="queens-solver" class="game-solver">
-            <h2>Queens Solver</h2>
-            <div class="solver-layout">
-                <div class="controls-panel">
-                    <label for="queens-grid-size-slider">Grid Size: <span id="queens-grid-size-label">8x8</span></label>
-                    <input type="range" id="queens-grid-size-slider" min="4" max="12" value="8">
-                    <button id="queens-clear-button">Clear</button>
-                    <button id="queens-solve-button">Solve</button>
+            <div class="solver-card">
+                <div class="solver-header">
+                    <h2 class="solver-title">
+                        <span class="solver-title-icon">♛</span>
+                        Queens Solver
+                    </h2>
+                    <a href="https://www.linkedin.com/games/queens/" target="_blank" rel="noopener noreferrer" class="play-link">
+                        Play on LinkedIn
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M5.22 14.78a.75.75 0 001.06 0l7.22-7.22v5.69a.75.75 0 001.5 0v-7.5a.75.75 0 00-.75-.75h-7.5a.75.75 0 000 1.5h5.69l-7.22 7.22a.75.75 0 000 1.06z" clip-rule="evenodd" />
+                        </svg>
+                    </a>
                 </div>
-                <div class="grid-panel">
-                    <div class="grid-container" id="queens-grid"></div>
+                <div class="solver-body">
+                    <div class="solver-layout">
+                        <div class="controls-panel">
+                            <div class="control-group">
+                                <label for="queens-grid-size-slider">
+                                    Grid Size: <span id="queens-grid-size-label" class="size-label">8×8</span>
+                                </label>
+                                <input type="range" id="queens-grid-size-slider" min="4" max="12" value="8">
+                            </div>
+                            <div class="button-group">
+                                <button id="queens-clear-button" class="btn-secondary">Clear</button>
+                                <button id="queens-solve-button" class="btn-primary">Solve</button>
+                            </div>
+                        </div>
+                        <div class="grid-panel">
+                            <div class="grid-container" id="queens-grid"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="instructions">
-                <h3>How to Use Solver:</h3>
-                <p><strong>Instructions:</strong></p>
+                <div class="instructions-header">
+                    <span class="instructions-icon">💡</span>
+                    <h3>How to Use</h3>
+                </div>
                 <ol>
-                    <li><strong>Define Regions:</strong> Click and drag on the grid to draw colored regions. Each distinct area you draw will be a new region. You can draw over existing regions to reassign cells. A single click on an unassigned cell starts a new region; dragging through an existing region's cell allows you to expand it.</li>
-                    <li><strong>Place Queens (Optional):</strong> Right-click on a colored cell to place a queen. Right-click again to remove it.</li>
-                    <li><strong>Solve:</strong> Click "Solve".</li>
-                    <li><strong>Note:</strong> The grid must have N regions for an N x N grid, and all cells must belong to a region before solving.</li>
+                    <li><strong>Define Regions:</strong> Click and drag to draw colored regions. Each area you draw becomes a new region.</li>
+                    <li><strong>Place Queens (Optional):</strong> Right-click on a colored cell to place/remove a queen.</li>
+                    <li>Click <strong>Solve</strong> to find the solution. The grid must have N regions for an N×N grid.</li>
+                    <li>Click <strong>Clear</strong> to reset all regions and queens.</li>
                 </ol>
             </div>
         </div>
+
+        <!-- Mini Sudoku Solver -->
         <div id="mini-solver" class="game-solver">
-            <h2>Mini Sudoku Solver</h2>
-            <div class="solver-layout">
-                <div class="controls-panel">
-                    <button id="mini-clear-button">Clear</button>
-                    <button id="mini-solve-button">Solve</button>
+            <div class="solver-card">
+                <div class="solver-header">
+                    <h2 class="solver-title">
+                        <span class="solver-title-icon">🔢</span>
+                        Mini Sudoku Solver
+                    </h2>
+                    <a href="https://www.linkedin.com/games/mini-sudoku/" target="_blank" rel="noopener noreferrer" class="play-link">
+                        Play on LinkedIn
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M5.22 14.78a.75.75 0 001.06 0l7.22-7.22v5.69a.75.75 0 001.5 0v-7.5a.75.75 0 00-.75-.75h-7.5a.75.75 0 000 1.5h5.69l-7.22 7.22a.75.75 0 000 1.06z" clip-rule="evenodd" />
+                        </svg>
+                    </a>
                 </div>
-                <div class="grid-panel">
-                    <div class="grid-container" id="mini-grid"></div>
+                <div class="solver-body">
+                    <div class="solver-layout">
+                        <div class="controls-panel">
+                            <div class="button-group">
+                                <button id="mini-clear-button" class="btn-secondary">Clear</button>
+                                <button id="mini-solve-button" class="btn-primary">Solve</button>
+                            </div>
+                        </div>
+                        <div class="grid-panel">
+                            <div class="grid-container" id="mini-grid"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="instructions">
-                <h3>How to Use Solver:</h3>
+                <div class="instructions-header">
+                    <span class="instructions-icon">💡</span>
+                    <h3>How to Use</h3>
+                </div>
                 <ol>
-                    <li>Left-click a cell to open the number picker and choose 1&ndash;6; right-click a cell to clear it.</li>
-                    <li>Each row, column, and 3x2 region must contain each number from 1 to 6 once.</li>
-                    <li>Press "Solve" to fill in the remaining cells. Solver-filled cells will be highlighted.</li>
-                    <li>Use "Clear" to reset the board.</li>
+                    <li>Left-click a cell to open the number picker and choose 1–6; right-click to clear.</li>
+                    <li>Each row, column, and 3×2 region must contain each number from 1 to 6 once.</li>
+                    <li>Click <strong>Solve</strong> to fill remaining cells. Solved cells will be highlighted differently.</li>
+                    <li>Click <strong>Clear</strong> to reset the board.</li>
                 </ol>
             </div>
         </div>
     </main>
+
+    <footer>
+        <p>
+            Unofficial solvers for 
+            <a href="https://www.linkedin.com/games/" target="_blank" rel="noopener noreferrer">LinkedIn Games</a>
+            • Built with ❤️
+        </p>
+    </footer>
+
     <script src="js/solvers/zipSolver.js"></script>
     <script src="js/solvers/tangoSolver.js"></script>
     <script src="js/solvers/queensSolver.js"></script>
     <script src="js/solvers/miniSudokuSolver.js"></script>
     <script src="js/main.js"></script>
+    <script src="js/theme.js"></script>
 </body>
 </html>
