@@ -161,6 +161,10 @@
                                 </label>
                                 <input type="range" id="queens-grid-size-slider" min="4" max="12" value="8">
                             </div>
+                            <div class="control-group">
+                                <label>Select Color:</label>
+                                <div id="queens-color-palette" class="color-palette"></div>
+                            </div>
                             <div class="button-group">
                                 <button id="queens-clear-button" class="btn-secondary">Clear</button>
                                 <button id="queens-solve-button" class="btn-primary">Solve</button>
@@ -178,10 +182,10 @@
                     <h3>How to Use</h3>
                 </div>
                 <ol>
-                    <li><strong>Define Regions:</strong> Click and drag to draw colored regions. Each area you draw becomes a new region.</li>
-                    <li><strong>Place Queens (Optional):</strong> Right-click on a colored cell to place/remove a queen.</li>
-                    <li>Click <strong>Solve</strong> to find the solution. The grid must have N regions for an N×N grid.</li>
-                    <li>Click <strong>Clear</strong> to reset all regions and queens.</li>
+                    <li><strong>Select a Color:</strong> Tap a color from the palette, then tap or drag on the grid to paint regions.</li>
+                    <li><strong>Erase:</strong> Select the eraser (✕) to remove cells from regions.</li>
+                    <li><strong>Place Queens (Optional):</strong> Long-press or right-click a colored cell to place/remove a queen.</li>
+                    <li>Click <strong>Solve</strong> to find the solution. You need exactly N regions for an N×N grid.</li>
                 </ol>
             </div>
         </div>

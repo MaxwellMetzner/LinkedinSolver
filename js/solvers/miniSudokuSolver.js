@@ -269,9 +269,14 @@ function handleMiniSudokuNumberSelect(value) {
 
 function applyMiniSudokuStyling() {
     if (!miniSudokuGridContainer) return;
-    const outerBorder = '3px solid #444';
-    const regionBorder = '2px solid #666';
-    const baseBorder = '1px solid #d4d4d4';
+    
+    // Get computed styles for CSS variable colors
+    const computedStyle = getComputedStyle(document.documentElement);
+    const borderStrong = computedStyle.getPropertyValue('--color-border-strong').trim() || '#666';
+    const borderNormal = computedStyle.getPropertyValue('--color-border').trim() || '#ddd';
+    
+    const regionBorder = `3px solid ${borderStrong}`;
+    const baseBorder = `1px solid ${borderNormal}`;
 
     const cells = miniSudokuGridContainer.querySelectorAll('.grid-cell');
     cells.forEach(cell => {
@@ -280,21 +285,23 @@ function applyMiniSudokuStyling() {
 
         if (Number.isNaN(row) || Number.isNaN(col)) return;
 
-        cell.style.borderTop = row === 0
-            ? outerBorder
-            : (row % MINI_SUDOKU_REGION_ROWS === 0 ? regionBorder : baseBorder);
-
-        cell.style.borderBottom = row === MINI_SUDOKU_SIZE - 1
-            ? outerBorder
-            : ((row + 1) % MINI_SUDOKU_REGION_ROWS === 0 ? regionBorder : baseBorder);
-
-        cell.style.borderLeft = col === 0
-            ? outerBorder
-            : (col % MINI_SUDOKU_REGION_COLS === 0 ? regionBorder : baseBorder);
-
-        cell.style.borderRight = col === MINI_SUDOKU_SIZE - 1
-            ? outerBorder
-            : ((col + 1) % MINI_SUDOKU_REGION_COLS === 0 ? regionBorder : baseBorder);
+        // Top border: region border between row 1/2 and 3/4
+        cell.style.borderTop = (row === 2 || row === 4) ? regionBorder : baseBorder;
+        
+        // Bottom border: region border after row 1 and 3
+        cell.style.borderBottom = (row === 1 || row === 3) ? regionBorder : baseBorder;
+        
+        // Left border: region border at column 3
+        cell.style.borderLeft = (col === 3) ? regionBorder : baseBorder;
+        
+        // Right border: region border after column 2
+        cell.style.borderRight = (col === 2) ? regionBorder : baseBorder;
+        
+        // Remove outer edges (handled by container border)
+        if (row === 0) cell.style.borderTop = 'none';
+        if (row === 5) cell.style.borderBottom = 'none';
+        if (col === 0) cell.style.borderLeft = 'none';
+        if (col === 5) cell.style.borderRight = 'none';
     });
 }
 
@@ -466,6 +473,11 @@ function initializeMiniSudokuSolver(gridContainer, createGridFunc, handlersObjec
         if (miniSudokuNumberPicker.contains(target)) return;
         if (miniSudokuGridContainer && miniSudokuGridContainer.contains(target)) return;
         hideMiniSudokuNumberPicker();
+    });
+    
+    // Re-apply styling when theme changes to update border colors
+    window.addEventListener('themechange', () => {
+        applyMiniSudokuStyling();
     });
 
     setMiniSudokuLocked(false);

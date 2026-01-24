@@ -40,6 +40,9 @@
         if (metaThemeColor) {
             metaThemeColor.setAttribute('content', theme === DARK_THEME ? '#1b1f23' : '#0a66c2');
         }
+        
+        // Dispatch custom event for components that need to update on theme change
+        window.dispatchEvent(new CustomEvent('themechange', { detail: { theme } }));
     }
 
     /**

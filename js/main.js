@@ -55,12 +55,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Standard grid for other games
         const cellSize = 40; // pixels
-        const gapSize = 2;   // pixels
+        const gapSize = 1;   // pixels (matches CSS gap)
         container.innerHTML = ''; // Clear previous grid
         container.style.gridTemplateColumns = `repeat(${size}, ${cellSize}px)`;
         container.style.gridTemplateRows = `repeat(${size}, ${cellSize}px)`;
-        container.style.width = `${size * cellSize + (size - 1) * gapSize}px`;
-        container.style.height = `${size * cellSize + (size - 1) * gapSize}px`;
+        // Let the grid size itself naturally based on content - don't set explicit width/height
+        // This prevents clipping issues with the border
+        container.style.width = '';
+        container.style.height = '';
         container.style.gap = `${gapSize}px`;
         container.style.display = 'grid'; // Ensure grid display type
 

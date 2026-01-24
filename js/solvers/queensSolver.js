@@ -4,23 +4,41 @@
 let queensGridSizeSlider, queensGridSizeLabel, queensClearButton, queensSolveButton;
 let queensGridContainer;
 let queensCreateGridFunc;
+let queensColorPalette;
 
 // --- State Variables ---
 const STATE = {
     currentSize: 8, // Default size
     isLeftMouseDown: false,
-    currentDrawingRegionId: null,
-    nextRegionId: 1,
+    selectedColorIndex: 0, // Currently selected color (0 = first color, -1 = eraser)
     regions: {}, // { regionId: { cells: Set<string> ('r-c'), color: string } }
     cellToRegionId: {}, // Map 'r-c' string to regionId
     placedQueens: [], // Array of {row, col, element} for user-placed queens
-    isDrawingNewRegion: false, // Flag for tracking new region drawing
-    colorPalette: ['#FFADAD', '#FFD6A5', '#FDFFB6', '#CAFFBF', '#9BF6FF', '#A0C4FF', '#BDB2FF', '#FFC6FF', '#E0E0E0', '#FFACC4', '#C5E1A5', '#FFE082', '#BCAAA4', '#B0BEC5']
+    // Rainbow color palette - will be generated based on grid size
+    colorPalette: []
 };
 
+// Generate aesthetically pleasing rainbow colors for N regions
+function generateRainbowPalette(n) {
+    const colors = [];
+    // Use HSL for smooth rainbow distribution
+    // Saturation and lightness tuned for pleasant, distinguishable colors
+    for (let i = 0; i < n; i++) {
+        const hue = Math.round((i / n) * 360);
+        // Vary saturation slightly for visual interest
+        const saturation = 70 + (i % 3) * 5; // 70-80%
+        const lightness = 65 + (i % 2) * 5;  // 65-70% for good visibility
+        colors.push(`hsl(${hue}, ${saturation}%, ${lightness}%)`);
+    }
+    return colors;
+}
+
 // --- Helper Functions ---
-function getRegionColor(regionId) {
-    return STATE.colorPalette[regionId % STATE.colorPalette.length];
+function getRegionColor(colorIndex) {
+    if (colorIndex < 0 || colorIndex >= STATE.colorPalette.length) {
+        return STATE.colorPalette[0];
+    }
+    return STATE.colorPalette[colorIndex];
 }
 
 function getCell(row, col) {
@@ -31,14 +49,28 @@ function getCellKey(row, col) {
     return `${row}-${col}`;
 }
 
+function updateColorUsageIndicators() {
+    if (!queensColorPalette) return;
+    const usedColors = new Set(
+        Object.values(STATE.cellToRegionId)
+            .map(v => Number(v))
+            .filter(v => v >= 0)
+    );
+    const swatches = queensColorPalette.querySelectorAll('.color-swatch');
+    swatches.forEach((swatch, i) => {
+        if (i >= STATE.colorPalette.length) return; // Skip the eraser swatch
+        const check = swatch.querySelector('.swatch-check');
+        if (!check) return;
+        check.classList.toggle('visible', usedColors.has(i));
+    });
+}
+
 function clearState() {
     STATE.isLeftMouseDown = false;
-    STATE.currentDrawingRegionId = null;
-    STATE.nextRegionId = 1;
     STATE.regions = {};
     STATE.cellToRegionId = {};
     STATE.placedQueens = [];
-    STATE.isDrawingNewRegion = false;
+    // Don't reset selectedColorIndex - keep user's selection
 }
 
 function clearGrid() {
@@ -54,6 +86,7 @@ function clearGrid() {
 function clearQueensStateAndGrid() {
     clearState();
     clearGrid();
+    updateColorUsageIndicators();
 }
 
 // Grid population from matrix data
@@ -61,19 +94,21 @@ function loadZones(zoneMatrix) {
     clearQueensStateAndGrid();
     const N = zoneMatrix.length;
     STATE.currentSize = N;
+    STATE.colorPalette = generateRainbowPalette(N);
+    renderColorPalette();
     
     zoneMatrix.forEach((rowArr, r) => {
         rowArr.forEach((rid, c) => {
-            if (!STATE.regions[rid]) {
-                const idNum = parseInt(rid, 10);
-                STATE.regions[rid] = { 
+            const colorIndex = parseInt(rid, 10) - 1;
+            if (!STATE.regions[colorIndex]) {
+                STATE.regions[colorIndex] = { 
                     cells: new Set(), 
-                    color: getRegionColor(idNum - 1) 
+                    color: getRegionColor(colorIndex) 
                 };
             }
             const key = getCellKey(r, c);
-            STATE.regions[rid].cells.add(key);
-            STATE.cellToRegionId[key] = rid;
+            STATE.regions[colorIndex].cells.add(key);
+            STATE.cellToRegionId[key] = colorIndex;
         });
     });
     
@@ -82,7 +117,7 @@ function loadZones(zoneMatrix) {
         queensCreateGridFunc(queensGridContainer, N, 'queens');
         
         // Color cells based on regions
-        Object.entries(STATE.regions).forEach(([rid, reg]) => {
+        Object.entries(STATE.regions).forEach(([colorIdx, reg]) => {
             reg.cells.forEach(key => {
                 const [r, c] = key.split('-').map(Number);
                 const cell = getCell(r, c);
@@ -90,6 +125,8 @@ function loadZones(zoneMatrix) {
             });
         });
     }
+
+    updateColorUsageIndicators();
 }
 
 // --- Queen Management ---
@@ -106,82 +143,121 @@ function removeQueen(row, col) {
     return false;
 }
 
+// --- Color Palette Management ---
+function renderColorPalette() {
+    if (!queensColorPalette) return;
+    
+    queensColorPalette.innerHTML = '';
+    
+    // Add color swatches
+    STATE.colorPalette.forEach((color, index) => {
+        const swatch = document.createElement('button');
+        swatch.className = 'color-swatch';
+        swatch.style.backgroundColor = color;
+        swatch.setAttribute('aria-label', `Color ${index + 1}`);
+        swatch.setAttribute('title', `Region ${index + 1}`);
+        if (index === STATE.selectedColorIndex) {
+            swatch.classList.add('active');
+        }
+        const check = document.createElement('span');
+        check.className = 'swatch-check';
+        check.setAttribute('aria-hidden', 'true');
+        swatch.appendChild(check);
+        swatch.addEventListener('click', () => selectColor(index));
+        queensColorPalette.appendChild(swatch);
+    });
+    
+    // Add eraser
+    const eraser = document.createElement('button');
+    eraser.className = 'color-swatch eraser';
+    eraser.innerHTML = '✕';
+    eraser.setAttribute('aria-label', 'Eraser');
+    eraser.setAttribute('title', 'Eraser - remove cells from regions');
+    if (STATE.selectedColorIndex === -1) {
+        eraser.classList.add('active');
+    }
+    eraser.addEventListener('click', () => selectColor(-1));
+    queensColorPalette.appendChild(eraser);
+
+    updateColorUsageIndicators();
+}
+
+function selectColor(index) {
+    STATE.selectedColorIndex = index;
+    
+    // Update visual selection
+    const swatches = queensColorPalette.querySelectorAll('.color-swatch');
+    swatches.forEach((swatch, i) => {
+        if (i < STATE.colorPalette.length) {
+            swatch.classList.toggle('active', i === index);
+        } else {
+            // Eraser is the last swatch
+            swatch.classList.toggle('active', index === -1);
+        }
+    });
+}
+
 // --- Event Handlers ---
 function handleQueensCellMouseDown(event, cell, row, col) {
     if (event.button === 0) { // Left click
         event.preventDefault();
         STATE.isLeftMouseDown = true;
-        const cellKey = getCellKey(row, col);
-
-        // Remove any queen at this location
-        removeQueen(row, col);
-
-        if (STATE.cellToRegionId[cellKey]) {
-            // Existing region clicked, prepare to expand it
-            STATE.currentDrawingRegionId = STATE.cellToRegionId[cellKey];
-            STATE.isDrawingNewRegion = false;
-        } else {
-            // Start a new region
-            STATE.isDrawingNewRegion = true;
-            STATE.currentDrawingRegionId = STATE.nextRegionId;
-            STATE.regions[STATE.currentDrawingRegionId] = {
-                cells: new Set(),
-                color: getRegionColor(STATE.currentDrawingRegionId - 1)
-            };
-            
-            STATE.regions[STATE.currentDrawingRegionId].cells.add(cellKey);
-            STATE.cellToRegionId[cellKey] = STATE.currentDrawingRegionId;
-            cell.style.backgroundColor = STATE.regions[STATE.currentDrawingRegionId].color;
-        }
+        paintCell(cell, row, col);
     }
 }
 
 function handleQueensCellMouseMove(event, cell, row, col) {
-    if (STATE.isLeftMouseDown && STATE.currentDrawingRegionId) {
+    if (STATE.isLeftMouseDown) {
         event.preventDefault();
-        const cellKey = getCellKey(row, col);
-        const targetRegionId = STATE.currentDrawingRegionId;
-        const targetRegion = STATE.regions[targetRegionId];
+        paintCell(cell, row, col);
+    }
+}
 
-        if (!targetRegion) return;
-
-        const existingRegionIdOfCell = STATE.cellToRegionId[cellKey];
-
-        // Handle moving from one region to another
-        if (existingRegionIdOfCell && existingRegionIdOfCell !== targetRegionId) {
-            const oldRegion = STATE.regions[existingRegionIdOfCell];
-            if (oldRegion) {
-                oldRegion.cells.delete(cellKey);
+function paintCell(cell, row, col) {
+    const cellKey = getCellKey(row, col);
+    const colorIndex = STATE.selectedColorIndex;
+    
+    // Remove any queen at this location when painting
+    removeQueen(row, col);
+    
+    if (colorIndex === -1) {
+        // Eraser mode - remove cell from its region
+        const existingRegionId = STATE.cellToRegionId[cellKey];
+        if (existingRegionId !== undefined && STATE.regions[existingRegionId]) {
+            STATE.regions[existingRegionId].cells.delete(cellKey);
+            delete STATE.cellToRegionId[cellKey];
+            cell.style.backgroundColor = '';
+        }
+    } else {
+        // Paint mode - assign cell to selected color region
+        const existingRegionId = STATE.cellToRegionId[cellKey];
+        
+        // Remove from old region if different
+        if (existingRegionId !== undefined && existingRegionId !== colorIndex) {
+            if (STATE.regions[existingRegionId]) {
+                STATE.regions[existingRegionId].cells.delete(cellKey);
             }
         }
-
-        // Add cell to target region if not already there
-        if (existingRegionIdOfCell !== targetRegionId) {
-            targetRegion.cells.add(cellKey);
-            STATE.cellToRegionId[cellKey] = targetRegionId;
-            cell.style.backgroundColor = targetRegion.color;
-
-            // Remove any queen on this cell
-            removeQueen(row, col);
+        
+        // Add to new region
+        if (!STATE.regions[colorIndex]) {
+            STATE.regions[colorIndex] = {
+                cells: new Set(),
+                color: getRegionColor(colorIndex)
+            };
         }
+        
+        STATE.regions[colorIndex].cells.add(cellKey);
+        STATE.cellToRegionId[cellKey] = colorIndex;
+        cell.style.backgroundColor = STATE.regions[colorIndex].color;
     }
+
+    updateColorUsageIndicators();
 }
 
 function handleQueensGridMouseUp(event) { 
     if (event.button === 0) { // Left click release
-        if (STATE.isLeftMouseDown && STATE.currentDrawingRegionId) {
-            if (STATE.isDrawingNewRegion) {
-                const currentRegion = STATE.regions[STATE.currentDrawingRegionId];
-                if (currentRegion && currentRegion.cells.size > 0) {
-                    STATE.nextRegionId++;
-                } else if (currentRegion && currentRegion.cells.size === 0) {
-                    delete STATE.regions[STATE.currentDrawingRegionId];
-                }
-            }
-        }
         STATE.isLeftMouseDown = false;
-        STATE.currentDrawingRegionId = null;
-        STATE.isDrawingNewRegion = false;
     }
 }
 
@@ -189,7 +265,7 @@ function handleQueensCellContextMenu(event, cell, row, col) {
     event.preventDefault();
     const cellKey = getCellKey(row, col);
     
-    if (!STATE.cellToRegionId[cellKey]) {
+    if (STATE.cellToRegionId[cellKey] === undefined) {
         alert("Please define a region for this cell before placing a queen.");
         return;
     }
@@ -204,7 +280,7 @@ function handleQueensCellContextMenu(event, cell, row, col) {
         
         // Restore region color
         const regionId = STATE.cellToRegionId[cellKey];
-        if (regionId && STATE.regions[regionId]) {
+        if (regionId !== undefined && STATE.regions[regionId]) {
             cell.style.backgroundColor = STATE.regions[regionId].color;
         } else {
             cell.style.backgroundColor = '';
@@ -274,7 +350,7 @@ function clearSolution() {
         const cellKey = getCellKey(row, col);
         const regionId = STATE.cellToRegionId[cellKey];
         
-        if (regionId && STATE.regions[regionId]) {
+        if (regionId !== undefined && STATE.regions[regionId]) {
             cell.style.backgroundColor = STATE.regions[regionId].color;
         }
     });
@@ -367,7 +443,7 @@ function canPlaceQueen(row, col, N, rowUsed, colUsed, regionUsed, currentSolutio
     const cellKey = getCellKey(row, col);
     const regionId = STATE.cellToRegionId[cellKey];
     
-    if (!regionId || regionUsed[regionId]) {
+    if (regionId === undefined || regionUsed[regionId]) {
         return false;
     }
     
@@ -414,6 +490,7 @@ function initializeQueensSolver(_gridContainer, _createGridFunc, _handlersObject
     queensGridSizeLabel = document.getElementById('queens-grid-size-label');
     queensClearButton = document.getElementById('queens-clear-button');
     queensSolveButton = document.getElementById('queens-solve-button');
+    queensColorPalette = document.getElementById('queens-color-palette');
 
     // Set up event handlers
     if (_handlersObject) {
@@ -427,7 +504,12 @@ function initializeQueensSolver(_gridContainer, _createGridFunc, _handlersObject
     // Initialize UI controls
     if (queensGridSizeSlider && queensGridSizeLabel) {
         STATE.currentSize = parseInt(queensGridSizeSlider.value, 10);
-        queensGridSizeLabel.textContent = `${STATE.currentSize}x${STATE.currentSize}`;
+        queensGridSizeLabel.textContent = `${STATE.currentSize}×${STATE.currentSize}`;
+        
+        // Generate initial color palette
+        STATE.colorPalette = generateRainbowPalette(STATE.currentSize);
+        STATE.selectedColorIndex = 0;
+        renderColorPalette();
         
         // Initial grid draw
         _createGridFunc(queensGridContainer, STATE.currentSize, 'queens');
@@ -435,7 +517,13 @@ function initializeQueensSolver(_gridContainer, _createGridFunc, _handlersObject
         // Set up slider event
         queensGridSizeSlider.addEventListener('input', () => {
             STATE.currentSize = parseInt(queensGridSizeSlider.value, 10);
-            queensGridSizeLabel.textContent = `${STATE.currentSize}x${STATE.currentSize}`;
+            queensGridSizeLabel.textContent = `${STATE.currentSize}×${STATE.currentSize}`;
+            
+            // Regenerate palette for new size
+            STATE.colorPalette = generateRainbowPalette(STATE.currentSize);
+            STATE.selectedColorIndex = 0;
+            renderColorPalette();
+            
             clearQueensStateAndGrid();
             _createGridFunc(queensGridContainer, STATE.currentSize, 'queens');
         });

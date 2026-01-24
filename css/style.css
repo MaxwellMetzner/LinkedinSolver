@@ -44,6 +44,8 @@
     --grid-cell-border: var(--color-border);
     --grid-cell-hover: var(--color-surface-hover);
     --grid-cell-selected: var(--color-accent-light);
+    /* Zip blocks (edge barriers) color - distinct from numbered tile borders */
+    --zip-block-color: var(--color-error);
     
     /* Spacing */
     --spacing-xs: 0.25rem;
@@ -523,11 +525,23 @@ main {
 
 .grid-container {
     display: grid;
-    gap: 2px;
-    padding: var(--spacing-sm);
+    gap: 1px;
+    padding: 0;
     background-color: var(--color-border);
     border-radius: var(--radius-md);
-    box-shadow: var(--shadow-inner);
+    border: 3px solid var(--color-border-strong);
+    box-shadow: 
+        0 4px 6px -1px rgba(0, 0, 0, 0.15),
+        0 2px 4px -1px rgba(0, 0, 0, 0.1),
+        0 0 0 1px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+[data-theme="dark"] .grid-container {
+    box-shadow: 
+        0 4px 6px -1px rgba(0, 0, 0, 0.4),
+        0 2px 4px -1px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 
 .grid-cell {
@@ -535,7 +549,6 @@ main {
     justify-content: center;
     align-items: center;
     background-color: var(--grid-cell-bg);
-    border-radius: var(--radius-sm);
     font-size: var(--font-size-lg);
     font-weight: var(--font-weight-medium);
     color: var(--color-text-primary);
@@ -603,6 +616,11 @@ main {
    ============================================ */
 
 /* --- Zip Solver --- */
+#zip-grid {
+    gap: 1px;
+    background-color: var(--color-border);
+}
+
 #zip-grid .grid-cell {
     cursor: pointer;
 }
@@ -645,10 +663,23 @@ main {
     grid-template-rows: repeat(11, auto);
     gap: 0;
     width: fit-content;
-    padding: var(--spacing-sm);
+    padding: var(--spacing-xs);
     background-color: var(--color-border);
     border-radius: var(--radius-md);
+    border: 3px solid var(--color-border-strong);
+    box-shadow: 
+        0 4px 6px -1px rgba(0, 0, 0, 0.15),
+        0 2px 4px -1px rgba(0, 0, 0, 0.1),
+        0 0 0 1px rgba(0, 0, 0, 0.05);
     user-select: none;
+    overflow: hidden;
+}
+
+[data-theme="dark"] #tango-grid {
+    box-shadow: 
+        0 4px 6px -1px rgba(0, 0, 0, 0.4),
+        0 2px 4px -1px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 
 #tango-grid .grid-cell {
@@ -736,6 +767,95 @@ main {
 }
 
 /* --- Queens Solver --- */
+
+/* Color Palette */
+.color-palette {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: var(--spacing-sm);
+    background-color: var(--color-surface-hover);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    max-width: 180px;
+}
+
+.color-swatch {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+    overflow: visible;
+}
+
+.color-swatch:hover {
+    transform: scale(1.1);
+    box-shadow: var(--shadow-md);
+}
+
+.color-swatch.active {
+    border-color: var(--color-text-primary);
+    box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-text-primary);
+    transform: scale(1.1);
+}
+
+.swatch-check {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 18px;
+    height: 18px;
+    border-radius: var(--radius-full);
+    background-color: var(--color-surface);
+    color: var(--color-text-primary);
+    border: 2px solid var(--color-text-primary);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: var(--font-weight-bold);
+    box-shadow: var(--shadow-sm);
+    z-index: 10;
+}
+
+.swatch-check::before {
+    content: '\2713';
+}
+
+.swatch-check.visible {
+    display: flex;
+}
+
+.color-swatch.eraser {
+    background-color: var(--color-surface);
+    border: 2px dashed var(--color-border-strong);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: var(--color-text-secondary);
+}
+
+.color-swatch.eraser:hover {
+    border-color: var(--color-error);
+    color: var(--color-error);
+}
+
+.color-swatch.eraser.active {
+    border-style: solid;
+    border-color: var(--color-error);
+    color: var(--color-error);
+    box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-error);
+}
+
+#queens-grid {
+    gap: 1px;
+    background-color: var(--color-border);
+}
+
 #queens-grid .grid-cell {
     cursor: pointer;
     transition: all var(--transition-fast);
@@ -764,10 +884,23 @@ main {
     grid-template-columns: repeat(6, 48px);
     grid-template-rows: repeat(6, 48px);
     gap: 0;
-    padding: var(--spacing-sm);
-    background-color: var(--color-border);
+    padding: 0;
+    background-color: var(--grid-cell-bg);
     border-radius: var(--radius-md);
+    border: 3px solid var(--color-border-strong);
+    box-shadow: 
+        0 4px 6px -1px rgba(0, 0, 0, 0.15),
+        0 2px 4px -1px rgba(0, 0, 0, 0.1),
+        0 0 0 1px rgba(0, 0, 0, 0.05);
     user-select: none;
+    overflow: hidden;
+}
+
+[data-theme="dark"] #mini-grid {
+    box-shadow: 
+        0 4px 6px -1px rgba(0, 0, 0, 0.4),
+        0 2px 4px -1px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 
 #mini-grid .grid-cell {
@@ -775,18 +908,8 @@ main {
     font-size: var(--font-size-lg);
     font-weight: var(--font-weight-medium);
     background-color: var(--grid-cell-bg);
-    border-radius: var(--radius-sm);
     transition: all var(--transition-fast);
-}
-
-/* Add borders for 3x2 regions */
-#mini-grid .grid-cell[data-col="2"] {
-    border-right: 2px solid var(--color-border-strong);
-}
-
-#mini-grid .grid-cell[data-row="1"],
-#mini-grid .grid-cell[data-row="3"] {
-    border-bottom: 2px solid var(--color-border-strong);
+    /* Borders will be set by JS with CSS variable colors */
 }
 
 #mini-grid .grid-cell:hover {

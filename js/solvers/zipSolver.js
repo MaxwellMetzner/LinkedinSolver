@@ -19,7 +19,7 @@ const blockStyleElement = document.createElement('style');
 blockStyleElement.textContent = `
 .block-indicator {
     position: absolute;
-    background-color: #444;
+    background-color: var(--zip-block-color);
     z-index: 20; /* Increased z-index to ensure visibility */
     pointer-events: none; /* Allow clicks to pass through to cell */
 }
@@ -521,21 +521,13 @@ function zipSolverButtonClick() {
         return;
     }
     
-    // Clear previous solution display
+    // Clear previous solution display, preserve user-selected numbered tiles
     const allCells = zipGridContainer.querySelectorAll('.grid-cell');
     allCells.forEach(cell => {
         cell.classList.remove('solved-path');
         clearZipSolutionStyling(cell);
         if (!cell.classList.contains('user-selected')) {
             cell.textContent = '';
-        } else {
-            const point = zipSelectedPoints.find(p => 
-                parseInt(p.element.dataset.row) === parseInt(cell.dataset.row) && 
-                parseInt(p.element.dataset.col) === parseInt(cell.dataset.col)
-            );
-            if (point) {
-                cell.textContent = point.order;
-            }
         }
     });
     
@@ -549,6 +541,14 @@ function zipSolverButtonClick() {
         displayZipSolutionOnGrid(zipCurrentSize, zipGridContainer);
         console.log(`Solution found in ${timeTaken} seconds (${zipSolverIterations} iterations)`);
     } else {
+        // On failed solve, clear blocks from the board but keep numbered tiles
+        zipBlocks.forEach(block => {
+            if (block.element && block.element.parentNode) {
+                block.element.parentNode.removeChild(block.element);
+            }
+        });
+        zipBlocks = [];
+        
         if (zipSolverIterations >= MAX_SOLVER_ITERATIONS) {
             alert(`Solver timed out after ${timeTaken} seconds. The puzzle may be too complex or unsolvable.`);
         } else {
