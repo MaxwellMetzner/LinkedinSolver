@@ -1,0 +1,13 @@
+# Visual Studio workspace artifacts
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Generated local indexes/databases
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.vsidx
