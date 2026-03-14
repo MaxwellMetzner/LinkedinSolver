@@ -1,15 +1,24 @@
 # LinkedinSolver
-Solvers for the LinkedIn daily puzzles (Zip, Queens, Tango, Mini Sudoku).
 
-## Pages
-- **Zip:** Build a path by ordering points and blocking edges; solver is a pruned backtracking path finder.
-- **Tango:** 6x6 sun/moon grid with edge constraints; uses constraint propagation plus backtracking.
-- **Queens:** Draw regions on an N x N board; search enforces one queen per region, row, column, and diagonal.
-- **Mini Sudoku:** 6x6 grid with number picker and right-click clear; validates row/col/box, then DFS solves.
+LinkedinSolver is a lightweight browser app for solving LinkedIn's daily puzzle games: Zip, Tango, Queens, and Mini Sudoku. Enter the board state from the game, run the solver, and use the result to check your progress or finish the puzzle faster.
+
+The project is a static site built with plain HTML, CSS, and JavaScript, so it runs entirely in the browser with no backend or build step.
+
+## Included solvers
+- **Zip:** Build a path by ordering points and blocking edges; solved with pruned backtracking.
+- **Tango:** Fill the 6x6 sun/moon grid under adjacency and edge constraints using propagation plus backtracking.
+- **Queens:** Paint regions on an N x N board and solve under row, column, region, and diagonal queen rules.
+- **Mini Sudoku:** Enter a 6x6 puzzle, validate row/column/box rules, and solve with depth-first search.
+
+## How to use
+- Open the app in a browser.
+- Select the puzzle tab you want.
+- Enter the clues or board layout from LinkedIn.
+- Click **Solve** to generate a solution, or **Clear** to reset the board.
 
 ## Behind the scenes
-- Grids are created per tab; each solver wires its own click and context handlers.
-- Inputs are validated before search to trim impossible states early.
-- Core solving is depth-first backtracking with puzzle-specific domain checks.
-- UI highlights distinguish user clues, solver-filled cells, and conflicts to guide fixes fast.
+- Each puzzle has its own interactive grid and input handlers.
+- Inputs are validated before search to reject impossible states early.
+- The solvers use backtracking, with puzzle-specific constraints to reduce the search space.
+- The UI highlights clues, solver-filled cells, and invalid states to make corrections easier.
 
