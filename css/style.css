@@ -418,16 +418,16 @@ main {
 .controls-panel input[type="range"] {
     width: 100%;
     height: 6px;
-    appearance: none;
     -webkit-appearance: none;
+    appearance: none;
     background: var(--color-border);
     border-radius: var(--radius-full);
     cursor: pointer;
 }
 
 .controls-panel input[type="range"]::-webkit-slider-thumb {
-    appearance: none;
     -webkit-appearance: none;
+    appearance: none;
     width: 18px;
     height: 18px;
     background: var(--color-accent);
@@ -448,6 +448,24 @@ main {
     border: none;
     border-radius: 50%;
     cursor: pointer;
+}
+
+.controls-panel input[type="number"] {
+    width: 100%;
+    padding: var(--spacing-sm) 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+    color: var(--color-text-primary);
+    font-family: inherit;
+    font-size: var(--font-size-md);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.controls-panel input[type="number"]:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 18%, transparent);
 }
 
 .size-label {
@@ -558,6 +576,7 @@ main {
     color: var(--color-text-primary);
     transition: all var(--transition-fast);
     cursor: default;
+    -webkit-user-select: none;
     user-select: none;
 }
 
@@ -675,6 +694,7 @@ main {
         0 4px 6px -1px rgba(0, 0, 0, 0.15),
         0 2px 4px -1px rgba(0, 0, 0, 0.1),
         0 0 0 1px rgba(0, 0, 0, 0.05);
+    -webkit-user-select: none;
     user-select: none;
     overflow: hidden;
 }
@@ -693,6 +713,7 @@ main {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    -webkit-user-select: none;
     user-select: none;
 }
 
@@ -771,6 +792,204 @@ main {
 }
 
 /* --- Queens Solver --- */
+
+/* --- Patches Solver --- */
+.patches-controls-panel {
+    min-width: 240px;
+}
+
+.patches-shape-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--spacing-sm);
+}
+
+.patches-shape-button {
+    padding: var(--spacing-sm) 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+    color: var(--color-text-primary);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.patches-shape-button:hover {
+    background-color: var(--color-surface-hover);
+    border-color: var(--color-border-strong);
+}
+
+.patches-shape-button.active {
+    background-color: var(--color-accent-light);
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+    box-shadow: inset 0 0 0 1px var(--color-accent-light);
+}
+
+.patches-source-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    max-height: 230px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.patches-source-empty {
+    padding: 0.75rem;
+    border: 1px dashed var(--color-border-strong);
+    border-radius: var(--radius-md);
+    color: var(--color-text-tertiary);
+    font-size: var(--font-size-sm);
+}
+
+.patches-source-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    width: 100%;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.patches-source-item:hover {
+    background-color: var(--color-surface-hover);
+    border-color: var(--color-border-strong);
+}
+
+.patches-source-item.active {
+    background-color: var(--color-accent-light);
+    border-color: var(--color-accent);
+}
+
+.patches-source-item-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 34px;
+    flex-shrink: 0;
+}
+
+.patches-source-item-label {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+}
+
+#patches-grid {
+    background-color: var(--color-border);
+}
+
+#patches-grid .grid-cell {
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+#patches-grid .grid-cell:hover {
+    filter: brightness(0.97);
+}
+
+#patches-grid .grid-cell.patches-source-cell {
+    background-color: var(--color-accent-light);
+}
+
+#patches-grid .grid-cell.patches-selected-cell {
+    outline: 3px solid var(--color-accent);
+    outline-offset: -3px;
+    z-index: 1;
+}
+
+#patches-grid .grid-cell.patches-source-solved-cell {
+    outline: 2px solid rgba(17, 24, 39, 0.5);
+    outline-offset: -2px;
+}
+
+.patches-cell-content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.patches-source-marker {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.95);
+    color: #111827;
+    border: 2px solid rgba(17, 24, 39, 0.72);
+    box-shadow: var(--shadow-sm);
+    line-height: 1;
+    font-weight: var(--font-weight-bold);
+    letter-spacing: -0.04em;
+    white-space: nowrap;
+}
+
+.patches-source-marker-grid {
+    font-size: 0.72rem;
+}
+
+.patches-source-marker-list {
+    font-size: 0.66rem;
+}
+
+.patches-source-marker-horizontal {
+    min-width: 28px;
+    height: 16px;
+    padding: 0 5px;
+    border-radius: 6px;
+}
+
+.patches-source-marker-vertical {
+    min-width: 20px;
+    height: 28px;
+    padding: 0 3px;
+    border-radius: 7px;
+}
+
+.patches-source-marker-square {
+    min-width: 22px;
+    height: 22px;
+    padding: 0 3px;
+    border-radius: 7px;
+}
+
+.patches-source-marker-free {
+    min-width: 24px;
+    height: 18px;
+    padding: 0 4px;
+    border-radius: 7px;
+    border-style: dashed;
+}
+
+.patches-source-marker.is-empty {
+    color: transparent;
+}
+
+.patches-source-marker.is-empty::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: var(--radius-full);
+    background-color: rgba(17, 24, 39, 0.45);
+}
+
+.patches-cell-ghost {
+    width: 6px;
+    height: 6px;
+    border-radius: var(--radius-full);
+    background-color: rgba(31, 41, 55, 0.18);
+}
 
 /* Color Palette */
 .color-palette {
@@ -896,6 +1115,7 @@ main {
         0 4px 6px -1px rgba(0, 0, 0, 0.15),
         0 2px 4px -1px rgba(0, 0, 0, 0.1),
         0 0 0 1px rgba(0, 0, 0, 0.05);
+    -webkit-user-select: none;
     user-select: none;
     overflow: hidden;
 }
@@ -955,6 +1175,7 @@ main {
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-xl);
+    -webkit-user-select: none;
     z-index: 1000;
 }
 

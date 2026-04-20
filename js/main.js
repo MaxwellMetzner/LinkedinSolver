@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
         zip: document.getElementById('zip-grid'),
         tango: document.getElementById('tango-grid'),
         queens: document.getElementById('queens-grid'),
+        patches: document.getElementById('patches-grid'),
         mini: document.getElementById('mini-grid'),
     };
 
@@ -15,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
         zip: {},
         tango: {},
         queens: {},
+        patches: {},
         mini: {}
     };
 
@@ -118,10 +120,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Tab switching logic ---
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
-            tabs.forEach(t => t.classList.remove('active'));
+            tabs.forEach(t => {
+                t.classList.remove('active');
+                t.setAttribute('aria-selected', 'false');
+            });
             solvers.forEach(s => s.classList.remove('active'));
 
             tab.classList.add('active');
+            tab.setAttribute('aria-selected', 'true');
             const targetSolverId = `${tab.dataset.tab}-solver`;
             const activeSolver = document.getElementById(targetSolverId);
             
@@ -198,6 +204,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof initializeQueensSolver === 'function') {
         initializeQueensSolver(gridContainers.queens, createGrid, solverEventHandlers.queens);
     }
+    if (typeof initializePatchesSolver === 'function') {
+        initializePatchesSolver(gridContainers.patches, createGrid, solverEventHandlers.patches);
+    }
     if (typeof initializeMiniSudokuSolver === 'function') {
         initializeMiniSudokuSolver(gridContainers.mini, createGrid, solverEventHandlers.mini);
     }
@@ -207,6 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (tabs.length > 0) {
         const firstTab = tabs[0];
         firstTab.classList.add('active');
+        firstTab.setAttribute('aria-selected', 'true');
         const firstSolverId = `${firstTab.dataset.tab}-solver`;
         const firstSolver = document.getElementById(firstSolverId);
         if (firstSolver) {
