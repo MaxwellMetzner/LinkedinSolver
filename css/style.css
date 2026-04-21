@@ -280,7 +280,9 @@ nav {
     align-items: center;
     justify-content: space-between;
     padding: 0 6px;
-    font-size: 12px;
+    font-size: 11px;
+    font-weight: var(--font-weight-bold);
+    color: rgba(255, 255, 255, 0.88);
 }
 
 .theme-toggle-thumb {
@@ -481,6 +483,10 @@ main {
     gap: var(--spacing-sm);
 }
 
+.button-group[hidden] {
+    display: none !important;
+}
+
 .controls-panel button {
     position: relative;
     padding: var(--spacing-sm) var(--spacing-lg);
@@ -510,14 +516,29 @@ main {
 }
 
 .btn-secondary {
-    background-color: var(--color-surface);
+    background: linear-gradient(180deg, var(--color-surface) 0%, var(--color-surface-hover) 100%);
     color: var(--color-text-primary);
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-border-strong);
+    box-shadow: 2px 2px 0 var(--color-border-strong), 0 3px 8px rgba(0, 0, 0, 0.08);
 }
 
 .btn-secondary:hover {
-    background-color: var(--color-surface-hover);
-    border-color: var(--color-border-strong);
+    background: linear-gradient(180deg, var(--color-surface-hover) 0%, var(--color-surface) 100%);
+    border-color: var(--color-accent);
+    transform: translateY(-1px);
+    box-shadow: 3px 3px 0 color-mix(in srgb, var(--color-accent) 45%, var(--color-border-strong)), 0 6px 14px rgba(0, 0, 0, 0.12);
+}
+
+.btn-secondary:active {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0 var(--color-border-strong), 0 2px 5px rgba(0, 0, 0, 0.12);
+}
+
+.controls-panel button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+    transform: none;
+    box-shadow: none;
 }
 
 /* Button ripple effect */
@@ -606,7 +627,16 @@ main {
 }
 
 .instructions-icon {
-    font-size: var(--font-size-lg);
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: var(--radius-full);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-accent);
+    background-color: var(--color-accent-light);
 }
 
 .instructions ol,
@@ -806,81 +836,36 @@ main {
 
 .patches-shape-button {
     padding: var(--spacing-sm) 0.75rem;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-border-strong);
     border-radius: var(--radius-md);
-    background-color: var(--color-surface);
+    background: linear-gradient(180deg, var(--color-surface) 0%, var(--color-surface-hover) 100%);
     color: var(--color-text-primary);
     font-family: inherit;
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-semibold);
     cursor: pointer;
     transition: all var(--transition-fast);
+    box-shadow: 2px 2px 0 var(--color-border-strong), 0 3px 8px rgba(0, 0, 0, 0.08);
 }
 
 .patches-shape-button:hover {
-    background-color: var(--color-surface-hover);
-    border-color: var(--color-border-strong);
+    background: linear-gradient(180deg, var(--color-surface-hover) 0%, var(--color-surface) 100%);
+    border-color: var(--color-accent);
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 color-mix(in srgb, var(--color-accent) 45%, var(--color-border-strong)), 0 6px 14px rgba(0, 0, 0, 0.12);
 }
 
 .patches-shape-button.active {
-    background-color: var(--color-accent-light);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--color-accent-light) 88%, var(--color-surface)) 0%, var(--color-accent-light) 100%);
     color: var(--color-accent);
     border-color: var(--color-accent);
-    box-shadow: inset 0 0 0 1px var(--color-accent-light);
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 color-mix(in srgb, var(--color-accent) 45%, var(--color-border-strong)), 0 6px 14px rgba(0, 0, 0, 0.12);
 }
 
-.patches-source-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-sm);
-    max-height: 230px;
-    overflow-y: auto;
-    padding-right: 4px;
-}
-
-.patches-source-empty {
-    padding: 0.75rem;
-    border: 1px dashed var(--color-border-strong);
-    border-radius: var(--radius-md);
-    color: var(--color-text-tertiary);
-    font-size: var(--font-size-sm);
-}
-
-.patches-source-item {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    width: 100%;
-    padding: 0.65rem 0.75rem;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background-color: var(--color-surface);
-    color: var(--color-text-primary);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-}
-
-.patches-source-item:hover {
-    background-color: var(--color-surface-hover);
-    border-color: var(--color-border-strong);
-}
-
-.patches-source-item.active {
-    background-color: var(--color-accent-light);
-    border-color: var(--color-accent);
-}
-
-.patches-source-item-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 34px;
-    flex-shrink: 0;
-}
-
-.patches-source-item-label {
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
+.patches-shape-button:active:not(.active) {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0 var(--color-border-strong), 0 2px 5px rgba(0, 0, 0, 0.12);
 }
 
 #patches-grid {

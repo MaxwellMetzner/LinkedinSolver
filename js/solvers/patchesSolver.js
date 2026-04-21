@@ -23,15 +23,14 @@ let patchesCreateGridFunc;
 let patchesGridSizeSlider;
 let patchesGridSizeLabel;
 let patchesAreaInput;
-let patchesSourceList;
-let patchesApplyButton;
 let patchesRemoveButton;
+let patchesRemoveButtonGroup;
 let patchesShapeButtons = [];
 
 const PATCHES_STATE = {
     currentSize: PATCHES_DEFAULT_SIZE,
     selectedCell: null,
-    selectedShape: PATCHES_SHAPES.HORIZONTAL,
+    selectedShape: null,
     sources: new Map(),
     solution: null,
     lastSolveStats: null
@@ -39,11 +38,6 @@ const PATCHES_STATE = {
 
 function getPatchesCellKey(row, col) {
     return `${row}-${col}`;
-}
-
-function parsePatchesCellKey(key) {
-    const [row, col] = key.split('-').map(Number);
-    return { row, col };
 }
 
 function getPatchesCell(row, col) {
@@ -97,11 +91,13 @@ function selectPatchesCell(row, col) {
     if (source) {
         patchesAreaInput.value = getPatchesAreaInputValue(source);
         setSelectedPatchesShape(source.type);
+    } else {
+        patchesAreaInput.value = '';
+        setSelectedPatchesShape(null);
     }
 
     updatePatchesInspector();
     renderPatchesGrid();
-    renderPatchesSourceList();
 }
 
 function setSelectedPatchesShape(shape) {
@@ -121,21 +117,26 @@ function updatePatchesInspector() {
     const selectedSource = getSelectedPatchesSource();
 
     if (!PATCHES_STATE.selectedCell) {
-        patchesApplyButton.disabled = true;
+        if (patchesRemoveButtonGroup) {
+            patchesRemoveButtonGroup.hidden = true;
+        }
         patchesRemoveButton.disabled = true;
-        patchesApplyButton.textContent = 'Apply Source';
+        patchesAreaInput.value = '';
+        setSelectedPatchesShape(null);
         return;
     }
 
     if (selectedSource) {
-        patchesApplyButton.textContent = 'Update Source';
+        if (patchesRemoveButtonGroup) {
+            patchesRemoveButtonGroup.hidden = false;
+        }
         patchesRemoveButton.disabled = false;
     } else {
-        patchesApplyButton.textContent = 'Apply Source';
+        if (patchesRemoveButtonGroup) {
+            patchesRemoveButtonGroup.hidden = true;
+        }
         patchesRemoveButton.disabled = true;
     }
-
-    patchesApplyButton.disabled = false;
 }
 
 function handlePatchesCellClick(event, _cell, row, col) {
@@ -158,7 +159,7 @@ function handlePatchesCellContextMenu(event, _cell, row, col) {
     selectPatchesCell(row, col);
 }
 
-function createPatchesSourceFromControls(row, col) {
+function buildPatchesSourceForSelection(row, col, shape) {
     const rawValue = patchesAreaInput.value.trim();
     let area = 0;
 
@@ -173,28 +174,34 @@ function createPatchesSourceFromControls(row, col) {
         };
     }
 
+    if (!shape) {
+        return {
+            ok: false,
+            message: 'Choose a region type for the selected tile.'
+        };
+    }
+
     return {
         ok: true,
         source: {
             row,
             col,
             area,
-            type: PATCHES_STATE.selectedShape
+            type: shape
         }
     };
 }
 
-function applyPatchesSource() {
+function commitPatchesSelection(shapeOverride = PATCHES_STATE.selectedShape) {
     if (!PATCHES_STATE.selectedCell) {
-        setPatchesStatus('Select a cell before applying a source.', 'error');
-        return;
+        return false;
     }
 
     const { row, col } = PATCHES_STATE.selectedCell;
-    const sourceCreation = createPatchesSourceFromControls(row, col);
+    const sourceCreation = buildPatchesSourceForSelection(row, col, shapeOverride);
     if (!sourceCreation.ok) {
         setPatchesStatus(sourceCreation.message, 'error');
-        return;
+        return false;
     }
 
     const nextSource = sourceCreation.source;
@@ -204,14 +211,15 @@ function applyPatchesSource() {
     const candidates = generatePatchesCandidatesForSource(nextSource, nextSources, PATCHES_STATE.currentSize);
     if (candidates.length === 0) {
         setPatchesStatus('That source has no legal rectangle placements on the current board.', 'error');
-        return;
+        return false;
     }
 
+    PATCHES_STATE.selectedShape = nextSource.type;
     PATCHES_STATE.sources = nextSources;
     clearPatchesSolution();
     updatePatchesInspector();
     renderPatchesGrid();
-    renderPatchesSourceList();
+    return true;
 }
 
 function removeSelectedPatchesSource() {
@@ -228,9 +236,10 @@ function removeSelectedPatchesSource() {
 
     PATCHES_STATE.sources.delete(sourceKey);
     clearPatchesSolution();
+    patchesAreaInput.value = '';
+    setSelectedPatchesShape(null);
     updatePatchesInspector();
     renderPatchesGrid();
-    renderPatchesSourceList();
 }
 
 function clearAllPatchesSources() {
@@ -239,7 +248,6 @@ function clearAllPatchesSources() {
     clearPatchesSolution();
     updatePatchesInspector();
     renderPatchesGrid();
-    renderPatchesSourceList();
 }
 
 function handlePatchesGridResize() {
@@ -251,7 +259,6 @@ function handlePatchesGridResize() {
     clearPatchesSolution();
     patchesCreateGridFunc(patchesGridContainer, PATCHES_STATE.currentSize, 'patches');
     updatePatchesInspector();
-    renderPatchesSourceList();
 }
 
 function isAllowedPatchesDimension(width, height, shape) {
@@ -795,46 +802,6 @@ function renderPatchesGrid() {
     }
 }
 
-function renderPatchesSourceList() {
-    if (!patchesSourceList) return;
-
-    const sources = getSortedPatchesSources();
-    patchesSourceList.innerHTML = '';
-
-    if (sources.length === 0) {
-        const empty = document.createElement('div');
-        empty.className = 'patches-source-empty';
-        empty.textContent = 'No source tiles added yet.';
-        patchesSourceList.appendChild(empty);
-        return;
-    }
-
-    const selectedKey = PATCHES_STATE.selectedCell
-        ? getPatchesCellKey(PATCHES_STATE.selectedCell.row, PATCHES_STATE.selectedCell.col)
-        : null;
-
-    sources.forEach(source => {
-        const sourceKey = getPatchesCellKey(source.row, source.col);
-        const item = document.createElement('button');
-        item.type = 'button';
-        item.className = 'patches-source-item';
-        item.classList.toggle('active', sourceKey === selectedKey);
-        item.addEventListener('click', () => selectPatchesCell(source.row, source.col));
-
-        const badge = document.createElement('span');
-        badge.className = 'patches-source-item-badge';
-    badge.appendChild(createPatchesSourceMarker(source, 'list'));
-        item.appendChild(badge);
-
-        const label = document.createElement('span');
-        label.className = 'patches-source-item-label';
-        label.textContent = `R${source.row + 1} C${source.col + 1} • ${getPatchesAreaSummary(source)}`;
-        item.appendChild(label);
-
-        patchesSourceList.appendChild(item);
-    });
-}
-
 function initializePatchesSolver(gridContainer, createGridFunc, handlersObject) {
     patchesGridContainer = gridContainer;
     patchesCreateGridFunc = createGridFunc;
@@ -842,9 +809,8 @@ function initializePatchesSolver(gridContainer, createGridFunc, handlersObject) 
     patchesGridSizeSlider = document.getElementById('patches-grid-size-slider');
     patchesGridSizeLabel = document.getElementById('patches-grid-size-label');
     patchesAreaInput = document.getElementById('patches-area-input');
-    patchesSourceList = document.getElementById('patches-source-list');
-    patchesApplyButton = document.getElementById('patches-apply-source-button');
     patchesRemoveButton = document.getElementById('patches-remove-source-button');
+    patchesRemoveButtonGroup = document.getElementById('patches-remove-button-group');
     patchesShapeButtons = Array.from(document.querySelectorAll('.patches-shape-button'));
 
     PATCHES_STATE.currentSize = Number.parseInt(patchesGridSizeSlider.value, 10) || PATCHES_DEFAULT_SIZE;
@@ -858,31 +824,43 @@ function initializePatchesSolver(gridContainer, createGridFunc, handlersObject) 
         handlersObject.getCurrentSize = () => PATCHES_STATE.currentSize;
         handlersObject.onAfterGridCreate = () => {
             renderPatchesGrid();
-            renderPatchesSourceList();
         };
     }
 
     patchesShapeButtons.forEach(button => {
         button.addEventListener('click', () => {
+            if (!PATCHES_STATE.selectedCell) {
+                setPatchesStatus('Select a tile before choosing a region type.', 'error');
+                return;
+            }
+
             setSelectedPatchesShape(button.dataset.shape);
+            commitPatchesSelection(button.dataset.shape);
         });
     });
 
     patchesGridSizeSlider.addEventListener('input', handlePatchesGridResize);
-    patchesApplyButton.addEventListener('click', applyPatchesSource);
     patchesRemoveButton.addEventListener('click', removeSelectedPatchesSource);
     document.getElementById('patches-clear-button').addEventListener('click', clearAllPatchesSources);
     document.getElementById('patches-solve-button').addEventListener('click', solvePatchesPuzzle);
+    patchesAreaInput.addEventListener('change', () => {
+        if (!PATCHES_STATE.selectedCell || !PATCHES_STATE.selectedShape) {
+            return;
+        }
+
+        commitPatchesSelection();
+    });
     patchesAreaInput.addEventListener('keydown', event => {
         if (event.key === 'Enter') {
             event.preventDefault();
-            applyPatchesSource();
+            if (PATCHES_STATE.selectedCell && PATCHES_STATE.selectedShape) {
+                commitPatchesSelection();
+            }
         }
     });
 
     setSelectedPatchesShape(PATCHES_STATE.selectedShape);
     updatePatchesInspector();
-    renderPatchesSourceList();
     createGridFunc(patchesGridContainer, PATCHES_STATE.currentSize, 'patches');
 
     if (PATCHES_STATE.currentSize < PATCHES_MIN_SIZE || PATCHES_STATE.currentSize > PATCHES_MAX_SIZE) {

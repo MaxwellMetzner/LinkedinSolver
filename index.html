@@ -12,31 +12,31 @@
     <meta name="theme-color" content="#0a66c2">
     <title>LinkedIn Game Solvers | Zip, Tango, Queens, Patches, Mini Sudoku</title>
     <link rel="stylesheet" href="css/style.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%230a66c2'/%3E%3Ctext x='50' y='62' font-size='42' font-family='Arial,sans-serif' text-anchor='middle' fill='white'%3ELS%3C/text%3E%3C/svg%3E">
 </head>
 <body>
     <header>
         <div class="header-container">
             <a href="#" class="logo">
-                <div class="logo-icon">🎮</div>
+                <div class="logo-icon">LS</div>
                 <span class="logo-text">Game Solvers</span>
             </a>
             
             <nav aria-label="Game selector" role="tablist">
                 <button id="tab-zip" class="tab-button active" data-tab="zip" role="tab" aria-controls="zip-solver" aria-selected="true">
-                    <span>⚡ Zip</span>
+                    <span>Zip</span>
                 </button>
                 <button id="tab-tango" class="tab-button" data-tab="tango" role="tab" aria-controls="tango-solver" aria-selected="false">
-                    <span>☯ Tango</span>
+                    <span>Tango</span>
                 </button>
                 <button id="tab-queens" class="tab-button" data-tab="queens" role="tab" aria-controls="queens-solver" aria-selected="false">
-                    <span>♛ Queens</span>
+                    <span>Queens</span>
                 </button>
                 <button id="tab-patches" class="tab-button" data-tab="patches" role="tab" aria-controls="patches-solver" aria-selected="false">
-                    <span>🧩 Patches</span>
+                    <span>Patches</span>
                 </button>
                 <button id="tab-mini" class="tab-button" data-tab="mini" role="tab" aria-controls="mini-solver" aria-selected="false">
-                    <span>🔢 Mini Sudoku</span>
+                    <span>Mini Sudoku</span>
                 </button>
             </nav>
             
@@ -58,7 +58,6 @@
             <div class="solver-card">
                 <div class="solver-header">
                     <h2 class="solver-title">
-                        <span class="solver-title-icon">⚡</span>
                         Zip Solver
                     </h2>
                     <a href="https://www.linkedin.com/games/zip/" target="_blank" rel="noopener noreferrer" class="play-link">
@@ -90,7 +89,7 @@
             </div>
             <div class="instructions">
                 <div class="instructions-header">
-                    <span class="instructions-icon">💡</span>
+                    <span class="instructions-icon" aria-hidden="true">i</span>
                     <h3>How to Use</h3>
                 </div>
                 <ol>
@@ -108,7 +107,6 @@
             <div class="solver-card">
                 <div class="solver-header">
                     <h2 class="solver-title">
-                        <span class="solver-title-icon">☯</span>
                         Tango Solver
                     </h2>
                     <a href="https://www.linkedin.com/games/tango/" target="_blank" rel="noopener noreferrer" class="play-link">
@@ -134,7 +132,7 @@
             </div>
             <div class="instructions">
                 <div class="instructions-header">
-                    <span class="instructions-icon">💡</span>
+                    <span class="instructions-icon" aria-hidden="true">i</span>
                     <h3>How to Use</h3>
                 </div>
                 <ol>
@@ -150,7 +148,6 @@
             <div class="solver-card">
                 <div class="solver-header">
                     <h2 class="solver-title">
-                        <span class="solver-title-icon">♛</span>
                         Queens Solver
                     </h2>
                     <a href="https://www.linkedin.com/games/queens/" target="_blank" rel="noopener noreferrer" class="play-link">
@@ -186,7 +183,7 @@
             </div>
             <div class="instructions">
                 <div class="instructions-header">
-                    <span class="instructions-icon">💡</span>
+                    <span class="instructions-icon" aria-hidden="true">i</span>
                     <h3>How to Use</h3>
                 </div>
                 <ol>
@@ -203,7 +200,6 @@
             <div class="solver-card">
                 <div class="solver-header">
                     <h2 class="solver-title">
-                        <span class="solver-title-icon">🧩</span>
                         Patches Solver
                     </h2>
                     <a href="https://www.linkedin.com/games/patches/" target="_blank" rel="noopener noreferrer" class="play-link">
@@ -229,23 +225,18 @@
                             <div class="control-group">
                                 <label>Region Type</label>
                                 <div id="patches-shape-buttons" class="patches-shape-buttons" role="group" aria-label="Patches region type">
-                                    <button type="button" class="patches-shape-button active" data-shape="horizontal">Horizontal</button>
+                                    <button type="button" class="patches-shape-button" data-shape="horizontal">Horizontal</button>
                                     <button type="button" class="patches-shape-button" data-shape="vertical">Vertical</button>
                                     <button type="button" class="patches-shape-button" data-shape="square">Square</button>
                                     <button type="button" class="patches-shape-button" data-shape="free">Free</button>
                                 </div>
                             </div>
-                            <div class="button-group">
-                                <button id="patches-apply-source-button" class="btn-secondary">Apply Source</button>
-                                <button id="patches-remove-source-button" class="btn-secondary">Remove Source</button>
+                            <div class="button-group" id="patches-remove-button-group" hidden>
+                                <button id="patches-remove-source-button" class="btn-secondary">Remove</button>
                             </div>
                             <div class="button-group">
                                 <button id="patches-clear-button" class="btn-secondary">Clear</button>
                                 <button id="patches-solve-button" class="btn-primary">Solve</button>
-                            </div>
-                            <div class="control-group">
-                                <label>Sources</label>
-                                <div id="patches-source-list" class="patches-source-list"></div>
                             </div>
                         </div>
                         <div class="grid-panel">
@@ -256,14 +247,14 @@
             </div>
             <div class="instructions">
                 <div class="instructions-header">
-                    <span class="instructions-icon">💡</span>
+                    <span class="instructions-icon" aria-hidden="true">i</span>
                     <h3>How to Use</h3>
                 </div>
                 <ol>
-                    <li>Click a tile, choose its region type, and enter its area if the puzzle shows a number. Leave the area blank for unnumbered sources, then click <strong>Apply Source</strong>.</li>
+                    <li>Click a tile, optionally enter its area, then press a region type button to set or update that source. Leave the area blank for unnumbered sources.</li>
                     <li>Horizontal, vertical, square, and free clues all create axis-aligned rectangles. Horizontal means width &gt; height, vertical means height &gt; width, and square means width = height.</li>
                     <li>Every source tile only needs to be contained somewhere inside its rectangle. It does not need to be on a corner.</li>
-                    <li>Right-click a source tile or use <strong>Remove Source</strong> to delete it.</li>
+                    <li>Changing the area for the selected source updates it automatically. Right-click a source tile or use <strong>Remove</strong> to delete it.</li>
                     <li>Click <strong>Solve</strong> to color each rectangle. Click <strong>Clear</strong> to reset the board.</li>
                 </ol>
             </div>
@@ -274,7 +265,6 @@
             <div class="solver-card">
                 <div class="solver-header">
                     <h2 class="solver-title">
-                        <span class="solver-title-icon">🔢</span>
                         Mini Sudoku Solver
                     </h2>
                     <a href="https://www.linkedin.com/games/mini-sudoku/" target="_blank" rel="noopener noreferrer" class="play-link">
@@ -300,7 +290,7 @@
             </div>
             <div class="instructions">
                 <div class="instructions-header">
-                    <span class="instructions-icon">💡</span>
+                    <span class="instructions-icon" aria-hidden="true">i</span>
                     <h3>How to Use</h3>
                 </div>
                 <ol>
@@ -317,7 +307,6 @@
         <p>
             Unofficial solvers for 
             <a href="https://www.linkedin.com/games/" target="_blank" rel="noopener noreferrer">LinkedIn Games</a>
-            • Built with ❤️
         </p>
     </footer>
 
