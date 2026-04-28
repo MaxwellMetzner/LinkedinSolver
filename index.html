@@ -16,12 +16,12 @@
 <body>
     <header>
         <div class="header-container">
-            <a href="#" class="logo">
+            <a href="#home" class="logo" aria-label="LinkedIn Game Solvers home">
                 <span class="logo-text">LinkedIn Game Solvers</span>
             </a>
             
             <nav aria-label="Game selector" role="tablist">
-                <button id="tab-zip" class="tab-button active" data-tab="zip" role="tab" aria-controls="zip-solver" aria-selected="true">
+                <button id="tab-zip" class="tab-button" data-tab="zip" role="tab" aria-controls="zip-solver" aria-selected="false">
                     <span>Zip</span>
                 </button>
                 <button id="tab-tango" class="tab-button" data-tab="tango" role="tab" aria-controls="tango-solver" aria-selected="false">
@@ -51,8 +51,44 @@
     </header>
 
     <main>
+        <section id="home" class="home-page active" aria-labelledby="home-title">
+            <div class="home-header">
+                <p class="home-kicker">LinkedIn Game Solvers</p>
+                <h1 id="home-title">Choose a solver</h1>
+                <p class="home-subtitle">Pick the LinkedIn game you are working on and jump straight into the matching board.</p>
+            </div>
+
+            <div class="solver-selection-grid" aria-label="Available solvers">
+                <button type="button" class="solver-select-card" data-tab="zip" aria-controls="zip-solver">
+                    <span class="solver-select-badge">Z</span>
+                    <span class="solver-select-name">Zip</span>
+                    <span class="solver-select-copy">Build a numbered path through the whole grid.</span>
+                </button>
+                <button type="button" class="solver-select-card" data-tab="tango" aria-controls="tango-solver">
+                    <span class="solver-select-badge">T</span>
+                    <span class="solver-select-name">Tango</span>
+                    <span class="solver-select-copy">Fill sun and moon boards with equality clues.</span>
+                </button>
+                <button type="button" class="solver-select-card" data-tab="queens" aria-controls="queens-solver">
+                    <span class="solver-select-badge">Q</span>
+                    <span class="solver-select-name">Queens</span>
+                    <span class="solver-select-copy">Paint regions and place one queen per row, column, and color.</span>
+                </button>
+                <button type="button" class="solver-select-card" data-tab="patches" aria-controls="patches-solver">
+                    <span class="solver-select-badge">P</span>
+                    <span class="solver-select-name">Patches</span>
+                    <span class="solver-select-copy">Tile the board with rectangles from the given clues.</span>
+                </button>
+                <button type="button" class="solver-select-card" data-tab="mini" aria-controls="mini-solver">
+                    <span class="solver-select-badge">M</span>
+                    <span class="solver-select-name">Mini Sudoku</span>
+                    <span class="solver-select-copy">Solve compact 6 by 6 sudoku boards.</span>
+                </button>
+            </div>
+        </section>
+
         <!-- Zip Solver -->
-        <div id="zip-solver" class="game-solver active" role="tabpanel" aria-labelledby="tab-zip">
+        <div id="zip-solver" class="game-solver" role="tabpanel" aria-labelledby="tab-zip">
             <div class="solver-card">
                 <div class="solver-header">
                     <h2 class="solver-title">
@@ -301,10 +337,11 @@
         </div>
     </main>
 
-    <footer>
+    <footer class="site-footer">
         <p>
-            Unofficial solvers for 
-            <a href="https://www.linkedin.com/games/" target="_blank" rel="noopener noreferrer">LinkedIn Games</a>
+            Built by <a href="https://maxwellmetzner.github.io/">Maxwell Metzner</a>
+            <span aria-hidden="true">&middot;</span>
+            Unofficial solvers for <a href="https://www.linkedin.com/games/" target="_blank" rel="noopener noreferrer">LinkedIn Games</a>
         </p>
     </footer>
 

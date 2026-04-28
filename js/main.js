@@ -2,6 +2,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     const tabs = document.querySelectorAll('.tab-button');
     const solvers = document.querySelectorAll('.game-solver');
+    const homePage = document.getElementById('home');
+    const solverSelectCards = document.querySelectorAll('.solver-select-card');
+    const logoLink = document.querySelector('.logo');
     const gridContainers = {
         zip: document.getElementById('zip-grid'),
         tango: document.getElementById('tango-grid'),
@@ -117,77 +120,97 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Tab switching logic ---
+    function setUrlHash(viewName) {
+        const nextHash = `#${viewName}`;
+        if (window.location.hash !== nextHash) {
+            window.history.pushState(null, '', nextHash);
+        }
+    }
+
+    function clearActiveSolverTabs() {
+        tabs.forEach(tab => {
+            tab.classList.remove('active');
+            tab.setAttribute('aria-selected', 'false');
+        });
+    }
+
+    function showHome(updateHash = true) {
+        if (homePage) {
+            homePage.classList.add('active');
+        }
+        solvers.forEach(solver => solver.classList.remove('active'));
+        clearActiveSolverTabs();
+
+        if (updateHash) {
+            setUrlHash('home');
+        }
+    }
+
+    function showSolver(gameName, updateHash = true) {
+        const activeSolver = document.getElementById(`${gameName}-solver`);
+        const activeTab = Array.from(tabs).find(tab => tab.dataset.tab === gameName);
+
+        if (!activeSolver || !activeTab) {
+            showHome(updateHash);
+            return;
+        }
+
+        if (homePage) {
+            homePage.classList.remove('active');
+        }
+        solvers.forEach(solver => solver.classList.remove('active'));
+        clearActiveSolverTabs();
+
+        activeSolver.classList.add('active');
+        activeTab.classList.add('active');
+        activeTab.setAttribute('aria-selected', 'true');
+        initializeActiveSolverGrid(gameName);
+
+        if (updateHash) {
+            setUrlHash(gameName);
+        }
+    }
+
+    function routeFromHash() {
+        const requestedView = window.location.hash.replace('#', '');
+        if (requestedView && gridContainers[requestedView]) {
+            showSolver(requestedView, false);
+            return;
+        }
+        showHome(false);
+    }
+
+    // --- View switching logic ---
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
-            tabs.forEach(t => {
-                t.classList.remove('active');
-                t.setAttribute('aria-selected', 'false');
-            });
-            solvers.forEach(s => s.classList.remove('active'));
-
-            tab.classList.add('active');
-            tab.setAttribute('aria-selected', 'true');
-            const targetSolverId = `${tab.dataset.tab}-solver`;
-            const activeSolver = document.getElementById(targetSolverId);
-            
-            if (activeSolver) {
-                activeSolver.classList.add('active');
-                const gameName = tab.dataset.tab;
-                initializeActiveSolverGrid(gameName);
-            }
+            showSolver(tab.dataset.tab);
         });
     });
+
+    solverSelectCards.forEach(card => {
+        card.addEventListener('click', () => {
+            showSolver(card.dataset.tab);
+        });
+    });
+
+    if (logoLink) {
+        logoLink.addEventListener('click', event => {
+            event.preventDefault();
+            showHome();
+        });
+    }
+
+    window.addEventListener('popstate', routeFromHash);
+    window.addEventListener('hashchange', routeFromHash);
 
     // --- Initialization Function for Active Solver Grid ---
     function initializeActiveSolverGrid(gameName) {
         const container = gridContainers[gameName];
-        if (!container) return;
+        const handlers = solverEventHandlers[gameName];
+        if (!container || !handlers || typeof handlers.getCurrentSize !== 'function') return;
 
-        // Each solver's initialize function is expected to set its current size
-        // and call createGrid itself, or we retrieve the size and call it here.
-        // For now, the solver initializers will call createGrid.
-        // We just need to ensure the correct one is called.
-        // The individual solver initializers should handle creating their first grid.
-        // This function is more for re-initializing or ensuring it's drawn if not already.
-
-        // Let's refine: the initializers will set up listeners.
-        // The actual first grid creation for the *default active tab* will be triggered here.
-        // For other tabs, it will be triggered on tab click.
-
-        if (gameName === 'zip') {
-            // Check if zipGridSizeSlider exists to get current size
-            const slider = document.getElementById('zip-grid-size-slider');
-            if (slider) {
-                 // initializeZipSolver should have already been called and set up its own grid.
-                 // This call might be redundant if initializeZipSolver already creates the grid.
-                 // However, it ensures that if a tab is switched TO, its grid is definitely (re)created.
-                 // Let's assume initialize functions *don't* create the grid, main.js does.
-                 // Modifying solver initializers to NOT call createGrid directly.
-                if (typeof initializeZipSolver === 'function' && solverEventHandlers.zip.getCurrentSize) {
-                     createGrid(container, solverEventHandlers.zip.getCurrentSize(), 'zip');
-                } else if (typeof zipCurrentSize !== 'undefined') { // Fallback to global if exposed (not ideal)
-                     createGrid(container, zipCurrentSize, 'zip');
-                }
-            }
-        } else if (gameName === 'tango') {
-            const slider = document.getElementById('tango-grid-size-slider');
-            if (slider) {
-                if (typeof initializeTangoSolver === 'function' && solverEventHandlers.tango.getCurrentSize) {
-                    createGrid(container, solverEventHandlers.tango.getCurrentSize(), 'tango');
-                } else if (typeof tangoCurrentSize !== 'undefined') {
-                     createGrid(container, tangoCurrentSize, 'tango');
-                }
-            }
-        } else if (gameName === 'queens') {
-            const slider = document.getElementById('queens-grid-size-slider');
-            if (slider) {
-                 if (typeof initializeQueensSolver === 'function' && solverEventHandlers.queens.getCurrentSize) {
-                    createGrid(container, solverEventHandlers.queens.getCurrentSize(), 'queens');
-                 } else if (typeof queensCurrentSize !== 'undefined') { // Fallback
-                    createGrid(container, queensCurrentSize, 'queens');
-                 }
-            }
+        if (container.children.length === 0) {
+            createGrid(container, handlers.getCurrentSize(), gameName);
         }
     }
 
@@ -212,39 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Initial setup on DOMContentLoaded ---
-    // Activate the first tab by default and create its grid
-    if (tabs.length > 0) {
-        const firstTab = tabs[0];
-        firstTab.classList.add('active');
-        firstTab.setAttribute('aria-selected', 'true');
-        const firstSolverId = `${firstTab.dataset.tab}-solver`;
-        const firstSolver = document.getElementById(firstSolverId);
-        if (firstSolver) {
-            firstSolver.classList.add('active');
-            const gameName = firstTab.dataset.tab;
-            // The solver initializer should now handle its first grid creation.
-            // So, calling initializeActiveSolverGrid here might be redundant if initializers do it.
-            // Let's adjust solver initializers: they should NOT create the grid.
-            // main.js will call createGrid after initialization.
-
-            // After initializers have run and populated handlers & potentially current sizes:
-            if (gameName === 'zip' && typeof solverEventHandlers.zip.getCurrentSize === 'function') {
-                createGrid(gridContainers.zip, solverEventHandlers.zip.getCurrentSize(), 'zip');
-            } else if (gameName === 'tango' && typeof solverEventHandlers.tango.getCurrentSize === 'function') {
-                 createGrid(gridContainers.tango, solverEventHandlers.tango.getCurrentSize(), 'tango');
-            } else if (gameName === 'queens' && typeof solverEventHandlers.queens.getCurrentSize === 'function') {
-                 createGrid(gridContainers.queens, solverEventHandlers.queens.getCurrentSize(), 'queens');
-            }
-        }
-    }
+    routeFromHash();
     console.log("Main.js loaded and initialized.");
 });
 
-// Note: Individual solver files (zipSolver.js, tangoSolver.js, queensSolver.js)
-// will need to be adjusted:
-// 1. Their `initializeSolverName` function should accept `(gridContainer, createGridFn, handlersObject)`
-// 2. They should populate the `handlersObject` with their specific functions like `handleCellClick`, etc.
-// 3. They should add a function to `handlersObject` like `getCurrentSize()` that returns their current grid size.
-// 4. They should NOT call `createGrid` themselves directly within their `initializeSolverName` function.
-//    `main.js` will handle calling `createGrid` after initialization and on tab switches.
-// 5. Their event listeners for controls (slider, clear, solve) should use `createGridFn` when they need to redraw the grid.
