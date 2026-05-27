@@ -1,8 +1,18 @@
 # LinkedinSolver
 
+**Live demo:** [maxwellmetzner.github.io/LinkedinSolver](https://maxwellmetzner.github.io/LinkedinSolver)
+
 LinkedinSolver is a lightweight browser app for solving LinkedIn's daily puzzle games: Zip, Tango, Queens, Patches, and Mini Sudoku. Enter the board state from the game, run the solver, and use the result to check your progress or finish the puzzle faster.
 
 The project is a static site built with plain HTML, CSS, and JavaScript, so it runs entirely in the browser with no backend or build step.
+
+## Try it online
+
+Use the live version here:
+
+[https://maxwellmetzner.github.io/LinkedinSolver](https://maxwellmetzner.github.io/LinkedinSolver)
+
+No installation is required. Open the site, choose a puzzle tab, enter the board state, and run the solver directly in your browser.
 
 ## Included solvers
 
@@ -14,7 +24,7 @@ The project is a static site built with plain HTML, CSS, and JavaScript, so it r
 
 ## How to use
 
-- Open the app in a browser.
+- Open the [live demo](https://maxwellmetzner.github.io/LinkedinSolver).
 - Select the puzzle tab you want.
 - Enter the clues or board layout from LinkedIn.
 - Click **Solve** to generate a solution, or **Clear** to reset the board.
