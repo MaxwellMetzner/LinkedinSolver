@@ -6,14 +6,6 @@ LinkedinSolver is a lightweight browser app for solving LinkedIn's daily puzzle 
 
 The project is a static site built with plain HTML, CSS, and JavaScript, so it runs entirely in the browser with no backend or build step.
 
-## Try it online
-
-Use the live version here:
-
-[https://maxwellmetzner.github.io/LinkedinSolver](https://maxwellmetzner.github.io/LinkedinSolver)
-
-No installation is required. Open the site, choose a puzzle tab, enter the board state, and run the solver directly in your browser.
-
 ## Included solvers
 
 - **Zip:** Build a path by ordering points and blocking edges; solved with pruned backtracking.
