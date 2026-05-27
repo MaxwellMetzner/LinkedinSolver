@@ -216,10 +216,7 @@ function handleQueensCellMouseMove(event, cell, row, col) {
 function paintCell(cell, row, col) {
     const cellKey = getCellKey(row, col);
     const colorIndex = STATE.selectedColorIndex;
-    
-    // Remove any queen at this location when painting
-    removeQueen(row, col);
-    
+
     if (colorIndex === -1) {
         // Eraser mode - remove cell from its region
         const existingRegionId = STATE.cellToRegionId[cellKey];
@@ -264,19 +261,12 @@ function handleQueensGridMouseUp(event) {
 function handleQueensCellContextMenu(event, cell, row, col) {
     event.preventDefault();
     const cellKey = getCellKey(row, col);
-    
-    if (STATE.cellToRegionId[cellKey] === undefined) {
-        alert("Please define a region for this cell before placing a queen.");
-        return;
-    }
 
     const existingQueenIndex = STATE.placedQueens.findIndex(q => q.row === row && q.col === col);
 
     if (existingQueenIndex > -1) { 
         // Remove queen
-        STATE.placedQueens.splice(existingQueenIndex, 1);
-        cell.textContent = '';
-        cell.classList.remove('queen-placed');
+        removeQueen(row, col);
         
         // Restore region color
         const regionId = STATE.cellToRegionId[cellKey];
@@ -308,6 +298,16 @@ function solveQueensAlgorithm() {
     
     if (regionIds.length !== N) {
         alert(`Define exactly ${N} regions before solving.`);
+        return;
+    }
+
+    const hasQueenOutsideRegion = STATE.placedQueens.some(({ row, col }) => {
+        const regionId = STATE.cellToRegionId[getCellKey(row, col)];
+        return regionId === undefined || !STATE.regions[regionId];
+    });
+
+    if (hasQueenOutsideRegion) {
+        alert("Every placed queen must be inside a defined region before solving.");
         return;
     }
 
@@ -363,6 +363,10 @@ function prepareInitialState(solution, rowUsed, colUsed, regionUsed) {
         const { row, col } = queen;
         const cellKey = getCellKey(row, col);
         const regionId = STATE.cellToRegionId[cellKey];
+
+        if (regionId === undefined || !STATE.regions[regionId]) {
+            return false;
+        }
         
         // Check if this violates any constraint
         if (rowUsed[row] || colUsed[col] || regionUsed[regionId]) {

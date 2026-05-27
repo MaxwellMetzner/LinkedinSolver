@@ -267,6 +267,28 @@ function handleMiniSudokuNumberSelect(value) {
     if (placed) hideMiniSudokuNumberPicker();
 }
 
+function handleMiniSudokuKeyDown(event) {
+    if (miniSudokuLocked || !miniSudokuActiveCell || !miniSudokuNumberPicker) return;
+    if (!miniSudokuNumberPicker.classList.contains('visible')) return;
+
+    if (/^[1-6]$/.test(event.key)) {
+        event.preventDefault();
+        handleMiniSudokuNumberSelect(Number(event.key));
+        return;
+    }
+
+    if (event.key === '0' || event.key === 'Backspace' || event.key === 'Delete') {
+        event.preventDefault();
+        handleMiniSudokuNumberSelect(0);
+        return;
+    }
+
+    if (event.key === 'Escape') {
+        event.preventDefault();
+        hideMiniSudokuNumberPicker();
+    }
+}
+
 function applyMiniSudokuStyling() {
     if (!miniSudokuGridContainer) return;
     
@@ -474,6 +496,8 @@ function initializeMiniSudokuSolver(gridContainer, createGridFunc, handlersObjec
         if (miniSudokuGridContainer && miniSudokuGridContainer.contains(target)) return;
         hideMiniSudokuNumberPicker();
     });
+
+    document.addEventListener('keydown', handleMiniSudokuKeyDown);
     
     // Re-apply styling when theme changes to update border colors
     window.addEventListener('themechange', () => {

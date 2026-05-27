@@ -631,6 +631,34 @@ main {
     box-shadow: 1px 1px 0 var(--color-border-strong), 0 2px 5px rgba(0, 0, 0, 0.12);
 }
 
+.controls-panel button[id$="-clear-button"].btn-secondary {
+    background: linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--color-accent) 22%, var(--color-surface)) 0%,
+        color-mix(in srgb, var(--color-accent) 34%, var(--color-surface)) 100%
+    );
+    color: var(--color-accent-hover);
+    border: 1px solid color-mix(in srgb, var(--color-accent) 70%, var(--color-border-strong));
+    box-shadow: 2px 2px 0 color-mix(in srgb, var(--color-accent) 45%, var(--color-border-strong)), 0 3px 8px rgba(10, 102, 194, 0.12);
+}
+
+.controls-panel button[id$="-clear-button"].btn-secondary:hover {
+    background: linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--color-accent) 30%, var(--color-surface)) 0%,
+        color-mix(in srgb, var(--color-accent) 42%, var(--color-surface)) 100%
+    );
+    color: var(--color-accent-hover);
+    border-color: var(--color-accent);
+    transform: translateY(-1px);
+    box-shadow: 3px 3px 0 color-mix(in srgb, var(--color-accent) 58%, var(--color-border-strong)), 0 6px 14px rgba(10, 102, 194, 0.16);
+}
+
+.controls-panel button[id$="-clear-button"].btn-secondary:active {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0 color-mix(in srgb, var(--color-accent) 45%, var(--color-border-strong)), 0 2px 5px rgba(10, 102, 194, 0.14);
+}
+
 .controls-panel button:disabled {
     cursor: not-allowed;
     opacity: 0.55;
@@ -780,15 +808,15 @@ main {
 }
 
 #zip-grid .grid-cell.user-selected {
-    background-color: var(--color-accent-light);
-    color: var(--color-accent);
+    background-color: #e8f4fd;
+    color: #191919;
     font-weight: var(--font-weight-bold);
     box-shadow: inset 0 0 0 2px var(--color-accent);
 }
 
 #zip-grid .grid-cell.zip-solution-cell {
     font-weight: var(--font-weight-semibold);
-    color: var(--color-text-primary);
+    color: #191919;
     transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
@@ -1173,13 +1201,14 @@ main {
 #queens-grid .grid-cell.queen-placed {
     font-weight: var(--font-weight-bold);
     font-size: 1.4em;
-    color: var(--color-text-primary);
+    color: #191919;
+    text-shadow: 0 0 4px rgba(255, 255, 255, 0.8);
 }
 
 #queens-grid .grid-cell.solved-queen {
     font-weight: var(--font-weight-bold);
     font-size: 1.4em;
-    color: var(--color-text-primary);
+    color: #191919;
     text-shadow: 0 0 4px rgba(255, 255, 255, 0.8);
 }
 
